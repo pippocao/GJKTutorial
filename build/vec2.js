@@ -1,11 +1,17 @@
 var GJKTutorial;
 (function (GJKTutorial) {
     class Vec2 {
-        constructor(_x, _y) {
+        constructor(_x = 0, _y = 0) {
             this.x = 0;
             this.y = 0;
             this.x = _x;
             this.y = _y;
+        }
+        get magnitude() {
+            return Math.sqrt(this.x * this.x + this.y * this.y);
+        }
+        get magnitudeSqr() {
+            return this.x * this.x + this.y * this.y;
         }
         Add(rhs) {
             return new Vec2(this.x + rhs.x, this.y + rhs.y);
@@ -13,8 +19,17 @@ var GJKTutorial;
         Sub(rhs) {
             return new Vec2(this.x - rhs.x, this.y - rhs.y);
         }
+        Mul(mul) {
+            return new Vec2(this.x * mul, this.y * mul);
+        }
+        Div(mul) {
+            return new Vec2(this.x / mul, this.y / mul);
+        }
         Dot(rhs) {
             return this.x * rhs.x + this.y + rhs.y;
+        }
+        Cross(rhs) {
+            return this.x * rhs.y - this.y * rhs.x;
         }
         toString() {
             return "{" + this.x + "," + this.y + "}";
