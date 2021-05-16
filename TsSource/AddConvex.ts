@@ -14,7 +14,7 @@ module GJKTutorial
         return name;
     }
 
-    function GetAvailableCoordinateName(framework : Framework, isSmallCase : boolean) : string
+    function GetAvailableCoordinateName(framework : Framework, isSmallCase : boolean, excludedNames : string[]) : string
     {
         let currentCharCodesSet = {};
         for(let i = 0; i < framework.GetConvexObjsCount(); ++i)
@@ -27,9 +27,15 @@ module GJKTutorial
                 {
                     continue;
                 }
-                name = name.toLowerCase();
-                currentCharCodesSet[convex.GetVertices()[j].name] = true;
+                name = isSmallCase ? name.toLowerCase() : name.toUpperCase();
+                currentCharCodesSet[name] = true;
             }
+        }
+        if(excludedNames)
+        {
+            excludedNames.forEach((name : string)=>{
+                currentCharCodesSet[isSmallCase ? name.toLowerCase() : name.toUpperCase()] = true;
+            })
         }
 
         let code = 0;  //custom code of latter 'a';
@@ -70,7 +76,11 @@ module GJKTutorial
                     //Left Mouse Button
                     let pos = new Vec2(evt.offsetX, evt.offsetY);
                     let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
-                    let name = GetAvailableCoordinateName(framework, true);
+                    let excludedNames : string[] = [];
+                    penddingVertices.forEach((vertex : Vertex)=>{
+                        excludedNames.push(vertex.name);
+                    });
+                    let name = GetAvailableCoordinateName(framework, true, excludedNames);
                     let vertex = new Vertex(coord, name);
                     vertex.drawName = false;
                     penddingVertices.push(vertex);
@@ -125,7 +135,7 @@ module GJKTutorial
                 vertex.drawName = true;
                 convex.AddVertex(vertex);
             }
-            convex.name = GetAvailableCoordinateName(framework, false);
+            convex.name = GetAvailableCoordinateName(framework, false, null);
             if(convex.IsConvex())
             {
                 framework.AddConvex(convex);
