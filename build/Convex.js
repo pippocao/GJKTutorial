@@ -39,6 +39,29 @@ var GJKTutorial;
             }
             return true;
         }
+        IsPointInConvex(point) {
+            if (this.vertices.length < 3) {
+                return false;
+            }
+            let lastCross = 0;
+            for (let i = 0; i < this.vertices.length; ++i) {
+                let point_current = this.vertices[i];
+                let point_next = this.vertices[(i + 1) % this.vertices.length];
+                let vector1 = point_next.coord.Sub(point_current.coord);
+                let vector2 = point.Sub(point_current.coord);
+                let cross = vector1.Cross(vector2);
+                if (lastCross == 0) {
+                    lastCross = cross;
+                }
+                else if (cross != 0) {
+                    if (cross * lastCross < 0) {
+                        return false;
+                    }
+                    lastCross = cross;
+                }
+            }
+            return true;
+        }
         GetCenterCoord() {
             let center = new GJKTutorial.Vec2();
             let sumWeight = 0;

@@ -55,6 +55,38 @@ module GJKTutorial
             return true;
         }
 
+        public IsPointInConvex(point : Vec2) : boolean
+        {
+            if(this.vertices.length < 3)
+            {
+                return false;
+            }
+            let lastCross = 0;
+            for(let i = 0; i < this.vertices.length; ++i)
+            {
+                let point_current = this.vertices[i];
+                let point_next = this.vertices[(i + 1) % this.vertices.length];
+
+                let vector1 = point_next.coord.Sub(point_current.coord);
+                let vector2 = point.Sub(point_current.coord);
+
+                let cross = vector1.Cross(vector2);
+
+                if(lastCross == 0)
+                {
+                    lastCross = cross;
+                }else if(cross != 0){
+                    if(cross * lastCross < 0)
+                    {
+                        return false;
+                    }
+                    lastCross = cross;
+                }
+
+            }
+            return true;
+        }
+
         public GetCenterCoord() : Vec2
         {
             let center : Vec2 = new Vec2();

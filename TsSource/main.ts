@@ -1,20 +1,22 @@
 module GJKTutorial
 {
 
-    class Main {
+    export class Framework {
         private canvas : HTMLCanvasElement;
         private context : CanvasRenderingContext2D;
         private coord : Coordinate;
         private convexObjs : Convex[] = [];
         private convexCounter : number = 0;
         private readonly convexFillColors : string[] = ['#8e232244', '#2387ff44'];
+        private customDrawBeforeDrawConvex : (coord : Coordinate, context : CanvasRenderingContext2D)=>void = null;
+        private customDrawAfterDrawConvex : (coord : Coordinate, context : CanvasRenderingContext2D)=>void = null;
 
-        constructor()
+        constructor(inCanvas : HTMLCanvasElement)
         {
-            this.canvas = document.getElementById('canvas') as
-                     HTMLCanvasElement;
+            this.canvas = inCanvas;
             this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
             this.coord = new Coordinate(this.canvas);
+            setInterval(()=>{this.update()}, 16);
         }
 
 
@@ -22,9 +24,32 @@ module GJKTutorial
         {
             this.ClearCanvas();
             this.DrawCoordinate();
+            if(this.customDrawBeforeDrawConvex)
+            {
+                this.customDrawBeforeDrawConvex(this.coord, this.context);
+            }
             this.DrawConvexObjs();
+            if(this.customDrawAfterDrawConvex)
+            {
+                this.customDrawAfterDrawConvex(this.coord, this.context);
+            }
         }
 
+        public SetCustomDrawFunctionBeforeDrawConvex(func : (coord : Coordinate, context : CanvasRenderingContext2D)=>void)
+        {
+            this.customDrawBeforeDrawConvex = func;
+        }
+
+
+        public SetCustomDrawFunctionAfterDrawConvex(func : (coord : Coordinate, context : CanvasRenderingContext2D)=>void)
+        {
+            this.customDrawAfterDrawConvex = func;
+        }
+
+        public GetCoordinate() : Coordinate
+        {
+            return this.coord;
+        }
 
         private ClearCanvas() : void
         {
@@ -45,12 +70,26 @@ module GJKTutorial
             }
         }
 
+        public GetConvexObjsCount() : number
+        {
+            return this.convexObjs.length;
+        }
 
+        public GetConvex(index : number) : Convex
+        {
+            return this.convexObjs[index];
+        }
+
+        //the maximum number of convex objects is 2;
         public AddConvex(convex : Convex) : void
         {
             this.convexObjs.push(convex);
             convex.fillColor = this.convexFillColors[this.convexCounter % this.convexFillColors.length];
             ++this.convexCounter;
+            if(this.convexObjs.length > 2)
+            {
+                this.convexObjs.splice(0, 1);
+            }
         }
 
         public RemoveConvex(convex : Convex | number) : void
@@ -71,7 +110,9 @@ module GJKTutorial
 
     window.onload = function()
     {
-        let main = new Main();
+        let canvas = document.getElementById('canvas') as
+                 HTMLCanvasElement;
+        let framework = new Framework(canvas);
     
         let conv = new Convex();
         conv.AddVertex(new Vertex(new Vec2(3, 4), "a"));
@@ -79,7 +120,7 @@ module GJKTutorial
         conv.AddVertex(new Vertex(new Vec2(-5, -4), "c"));
         conv.AddVertex(new Vertex(new Vec2(-8, -2), "d"));
         conv.name = "A";
-        main.AddConvex(conv);
+        framework.AddConvex(conv);
     
         
         conv = new Convex();
@@ -87,10 +128,13 @@ module GJKTutorial
         conv.AddVertex(new Vertex(new Vec2(2, 2), "f"));
         conv.AddVertex(new Vertex(new Vec2(-5, -4), "g"));
         conv.name = "B";
-        main.AddConvex(conv);
-    
-        console.log(conv.IsConvex());
-    
-        setInterval(()=>{main.update()}, 16);
+        framework.AddConvex(conv);
+
+        let buttonClear = document.getElementById('ClearAllConvex');
+        let buttonBeginAdd = document.getElementById('BeginAddNewConvex');
+        let buttonFinishAdd = document.getElementById('FinishAddNewConvex');
+        let buttonCancel = document.getElementById('CancelAddNewConvex');
+
+        InitDrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel);
     };
 }
