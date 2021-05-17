@@ -8,42 +8,62 @@ module GJKTutorial
         private convexObjs : Convex[] = [];
         private convexCounter : number = 0;
         private readonly convexFillColors : string[] = ['#8e232244', '#2387ff44'];
-        private customDrawBeforeDrawConvex : (coord : Coordinate, context : CanvasRenderingContext2D)=>void = null;
-        private customDrawAfterDrawConvex : (coord : Coordinate, context : CanvasRenderingContext2D)=>void = null;
+        private customDrawsBeforeDrawConvex : ((deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void) [] = [];
+        private customDrawsAfterDrawConvex : ((deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void) [] = [];
 
         constructor(inCanvas : HTMLCanvasElement)
         {
             this.canvas = inCanvas;
             this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
             this.coord = new Coordinate(this.canvas);
-            setInterval(()=>{this.update()}, 16);
+            let lastUpdateTime = Date.now();
+            setInterval(()=>{
+                let currentTime = Date.now();
+                this.update(currentTime - lastUpdateTime);
+                lastUpdateTime = currentTime;
+            }, 16);
         }
 
 
-        public update() : void
+        public update(deltaMs : number) : void
         {
             this.ClearCanvas();
-            this.DrawCoordinate();
-            if(this.customDrawBeforeDrawConvex)
+            this.DrawCoordinate(deltaMs);
+            this.customDrawsBeforeDrawConvex.forEach(element => {
+                element(deltaMs, this.coord, this.context);
+            });
+            this.DrawConvexObjs(deltaMs);
+            this.customDrawsAfterDrawConvex.forEach(element => {
+                element(deltaMs, this.coord, this.context);
+            });
+        }
+
+        public AddCustomDrawFunctionBeforeDrawConvex(func : (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void)
+        {
+            this.customDrawsBeforeDrawConvex.push(func);
+        }
+
+        public RmvCustomDrawFunctionBeforeDrawConvex(func : (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void)
+        {
+            let index = this.customDrawsBeforeDrawConvex.indexOf(func);
+            if(index >= 0)
             {
-                this.customDrawBeforeDrawConvex(this.coord, this.context);
-            }
-            this.DrawConvexObjs();
-            if(this.customDrawAfterDrawConvex)
-            {
-                this.customDrawAfterDrawConvex(this.coord, this.context);
+                this.customDrawsBeforeDrawConvex.splice(index, 1);
             }
         }
 
-        public SetCustomDrawFunctionBeforeDrawConvex(func : (coord : Coordinate, context : CanvasRenderingContext2D)=>void)
+        public AddCustomDrawFunctionAfterDrawConvex(func : (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void)
         {
-            this.customDrawBeforeDrawConvex = func;
+            this.customDrawsAfterDrawConvex.push(func);
         }
 
-
-        public SetCustomDrawFunctionAfterDrawConvex(func : (coord : Coordinate, context : CanvasRenderingContext2D)=>void)
+        public RmvCustomDrawFunctionAfterDrawConvex(func : (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void)
         {
-            this.customDrawAfterDrawConvex = func;
+            let index = this.customDrawsAfterDrawConvex.indexOf(func);
+            if(index >= 0)
+            {
+                this.customDrawsAfterDrawConvex.splice(index, 1);
+            }
         }
 
         public GetCoordinate() : Coordinate
@@ -57,16 +77,16 @@ module GJKTutorial
         }
 
 
-        private DrawCoordinate() : void
+        private DrawCoordinate(deltaMs : number) : void
         {
-            this.coord.Draw(this.context);
+            this.coord.Draw(deltaMs, this.context);
         }
 
-        private DrawConvexObjs() : void
+        private DrawConvexObjs(deltaMs : number) : void
         {
             for(let i = 0; i < this.convexObjs.length; ++i)
             {
-                this.convexObjs[i].Draw(this.coord, this.context);
+                this.convexObjs[i].Draw(deltaMs, this.coord, this.context);
             }
         }
 
@@ -114,6 +134,7 @@ module GJKTutorial
                  HTMLCanvasElement;
         let framework = new Framework(canvas);
     
+        /////////////////////Default Convex Objects////////////////////
         let conv = new Convex();
         conv.AddVertex(new Vertex(new Vec2(3, 4), "a"));
         conv.AddVertex(new Vertex(new Vec2(5, 2), "b"));
@@ -129,12 +150,74 @@ module GJKTutorial
         conv.AddVertex(new Vertex(new Vec2(-5, -4), "g"));
         conv.name = "B";
         framework.AddConvex(conv);
+        /////////////////////Default Convex Objects////////////////////
 
+        /////////////////////Custom Convex Functions////////////////////
         let buttonClear = document.getElementById('ClearAllConvex');
         let buttonBeginAdd = document.getElementById('BeginAddNewConvex');
         let buttonFinishAdd = document.getElementById('FinishAddNewConvex');
         let buttonCancel = document.getElementById('CancelAddNewConvex');
 
-        InitDrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel);
+        InitShowCase_DrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel);
+        /////////////////////Custom Convex Functions////////////////////
+
+
+
+        /////////////////////Full Minkowski Difference Preview////////////////////
+        let buttonToggleMinkowskiDiff = document.getElementById("MinkowskiDiffToggle");
+        InitShowCase_MinkowskiDiff(framework, buttonToggleMinkowskiDiff);
+        /////////////////////Full Minkowski Difference Preview////////////////////
+
+
+
+
+        /////////////////////////Drag Convex///////////////////////////////////
+        {
+            let bDrag = false;
+            let draggingConvexObj : Convex = null;
+            let lastCood : Vec2 = null;
+            canvas.addEventListener('mousedown', (evt)=>{
+                if(evt.button != 1)
+                {
+                    return;
+                }
+                event.preventDefault();
+                bDrag = true;
+
+                let pos = new Vec2(evt.offsetX, evt.offsetY);
+                lastCood = framework.GetCoordinate().GetCoordByCanvasPos(pos);
+                for(let i = 0; i < framework.GetConvexObjsCount(); ++i)
+                {
+                    let candidiateConvex = framework.GetConvex(i);
+                    if(candidiateConvex.IsPointInConvex(lastCood))
+                    {
+                        draggingConvexObj = candidiateConvex;
+                        break;
+                    }
+                }
+            });
+    
+            canvas.addEventListener('mousemove', (evt)=>{
+                if(!bDrag || !draggingConvexObj)
+                {
+                    return;
+                }
+                let pos = new Vec2(evt.offsetX, evt.offsetY);
+                let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
+                draggingConvexObj.Translate(coord.Sub(lastCood));
+                lastCood = coord;
+            });
+    
+            canvas.addEventListener('mouseup', (evt)=>{
+                if(evt.button != 1)
+                {
+                    return;
+                }
+                event.preventDefault();
+                bDrag = false;
+                draggingConvexObj = null;
+            });
+        }
+        //////////////////////////////////////////////////////////////////////
     };
 }

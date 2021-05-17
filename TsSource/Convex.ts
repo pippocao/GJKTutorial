@@ -3,9 +3,19 @@ module GJKTutorial
     export class Convex
     {
         private vertices : Vertex[] = [];
-        public name : string;   //for display
         public drawName : boolean = true;  //toggle for name display;
         public fillColor : string = "#ffffffff";
+        private _name : string;
+
+        public get name() : string   //for display
+        {
+            return this._name;
+        }
+
+        public set name(inName : string)
+        {
+            this._name = inName ? inName.toUpperCase() : inName;
+        }
 
         public AddVertex(vertex : Vertex) : void
         {
@@ -20,6 +30,77 @@ module GJKTutorial
         public GetVertices() : ReadonlyArray<Vertex>
         {
             return this.vertices;
+        }
+
+        public Translate(offset : Vec2) : void
+        {
+            for(let i = 0; i < this.vertices.length; ++i)
+            {
+                this.vertices[i].coord = this.vertices[i].coord.Add(offset);
+            }
+        }
+
+        //re-order the vertices, try to make this polygon convex(CW order).
+        public ReOrder() : void
+        {
+            let verticesTmp:Vertex[] = [...this.vertices];
+            let newVerticesTmp:Vertex[] = [];
+            if(verticesTmp.length < 3)
+            {
+                return;
+            }
+
+            let firstVertexIndex = -1;
+            let minX = Number.MAX_VALUE;
+            for(let i = 0; i < verticesTmp.length; ++i)
+            {
+                if(verticesTmp[i].coord.x < minX)
+                {
+                    minX = verticesTmp[i].coord.x;
+                }
+                firstVertexIndex = i;
+            }
+            newVerticesTmp.push(verticesTmp.splice(firstVertexIndex, 1)[0]);
+            let startVertex = newVerticesTmp[0];
+            let upDir = new Vec2(0, 1);
+            verticesTmp.sort((a, b)=>{
+                let dirA = a.coord.Sub(startVertex.coord);
+                let dirB = b.coord.Sub(startVertex.coord);
+                
+                let magnitudeA = dirA.magnitude;
+                let magnitudeB = dirB.magnitude;
+
+                if(magnitudeA == 0)
+                {
+                    return -1;
+                }else if(magnitudeB == 0)
+                {
+                    return 1;
+                }
+
+                dirA = dirA.Normalize();
+                dirB = dirB.Normalize();
+
+                let dotA = upDir.Dot(dirA);
+                let dotB = upDir.Dot(dirB);
+
+                if(dotA != dotB)
+                {
+                    return dotB - dotA;
+                }
+
+                if(a.coord.y >= startVertex.coord.y)
+                {
+                    return magnitudeA - magnitudeB
+                }else{
+                    return magnitudeB - magnitudeA;
+                }
+
+                return 1;
+            });
+            
+            newVerticesTmp.push(...verticesTmp);
+            this.vertices = newVerticesTmp;
         }
 
         public IsConvex() : boolean
@@ -104,7 +185,7 @@ module GJKTutorial
             return center.Div(sumWeight);
         }
 
-        public Draw(coord : Coordinate, context : CanvasRenderingContext2D) : void
+        public Draw(deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D) : void
         {
             if(this.vertices.length <= 0)
             {
@@ -127,7 +208,7 @@ module GJKTutorial
 
             for(let i = 0; i < this.vertices.length; ++i)
             {
-                this.vertices[i].Draw(coord, context);
+                this.vertices[i].Draw(deltaMs, coord, context);
             }
             if(this.drawName && this.name)
             {

@@ -3,8 +3,19 @@ module GJKTutorial
     export class Vertex
     {
         public coord : Vec2;
-        public name : string;   //for display
         public drawName : boolean = true;  //toggle for name display;
+
+        private _name : string;
+
+        public get name() : string   //for display
+        {
+            return this._name;
+        }
+
+        public set name(inName : string)
+        {
+            this._name = inName ? inName.toLowerCase() : inName;
+        }
 
         constructor(inCoord : Vec2, inName : string)
         {
@@ -12,16 +23,7 @@ module GJKTutorial
             this.name = inName;
         }
 
-        private static numToString(num : number, accuracy : number) : string
-        {
-            let mul = Math.pow(10, accuracy);
-            num = num * mul;
-            num = Math.round(num);
-            num = num / mul;
-            return num + "";
-        }
-
-        public Draw(coord : Coordinate, context : CanvasRenderingContext2D) : void
+        public Draw(deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D) : void
         {
             if(!this.drawName)
             {
@@ -30,7 +32,7 @@ module GJKTutorial
             let pos = coord.GetCanvasPosByCoord(this.coord);
             context.font = "30px Arial";
             context.fillStyle = "#000000FF";
-            context.fillText(this.name + "(" + Vertex.numToString(this.coord.x, 2) + "," + Vertex.numToString(this.coord.y, 2) + ")", pos.x, pos.y);
+            context.fillText(this.name + "(" + numToString(this.coord.x, 2) + "," + numToString(this.coord.y, 2) + ")", pos.x, pos.y);
         }
     }
 }

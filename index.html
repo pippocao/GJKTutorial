@@ -2,34 +2,47 @@
 
 <head>
     <title>Canvas demo</title>
-    <script src="build/Coordinate.js"></script>
-    <script src="build/vec2.js"></script>
+    <script src="build/Utils.js"></script>
+    <script src="build/Vec2.js"></script>
     <script src="build/Vertex.js"></script>
+    <script src="build/Coordinate.js"></script>
     <script src="build/Convex.js"></script>
-    <script src="build/AddConvex.js"></script>
+    <script src="build/GJKAlgorithms.js"></script>
+    <script src="build/ShowCase_AddConvex.js"></script>
+    <script src="build/ShowCase_MinkowskiDiff.js"></script>
     <script src="build/main.js"></script>
 </head>
 
 <body>
-    <canvas id="canvas" width="800" height="800"
-            style="border: 1px solid black;">
-    </canvas>
-    <br/>
-    <button id="ClearAllConvex">ClearAllConvex</button>
-    <br/>
-    <button id="BeginAddNewConvex" >BeginAddConvex</button>
-    <button id="CancelAddNewConvex" disabled>CancelAddConvex</button>
-    <button id="FinishAddNewConvex" disabled >FinishAddConvex</button>
-    <br/>
-    <h4>How to add Convex:</h4>
-    <div style="text-indent: 2em;">
-    Click "BeginAddConvex" button, add click your left mouse button to add vertices of the new convex object. You can also click right mouse button to remove the last vertex you've added. 
-    </div>
-    <div style="text-indent: 2em;">
-    Click "CancelAddNewConvex" button to cancel current "Adding Convex Object" action, all the vertices you've just added for this convex object will be removed.
-    </div>
-    <div style="text-indent: 2em;">
-    Click "FinishAddConvex" button will add the convex object to the coordinate and you can use it to test the collision detecting. 
+    <div style="width:2400">
+        
+        <canvas id="canvas" width="1600" height="1600"
+            style="border: 1px solid black; float: left;">
+        </canvas>
+        <div id="buttons" style="margin-top: 400;float: left;">
+            <button id="ClearAllConvex">Clear All Convex Objects</button>
+            <br/>
+            <button id="BeginAddNewConvex" >Begin Add Convex</button>
+            <button id="CancelAddNewConvex" disabled>Cancel Add Convex</button>
+            <button id="FinishAddNewConvex" disabled >Finish Add Convex</button>
+            <br/>
+            <br/>
+            <button id="MinkowskiDiffToggle">Full Minkowski Difference Toggle</button>
+            <br/>
+            <br/>
+        </div>
+        <div id="informations" style="float: left;">
+            <h4>How to add Convex:</h4>
+            <div style="text-indent: 2em;">
+            Click "BeginAddConvex" button, add click your left mouse button to add vertices of the new convex object. You can also click right mouse button to remove the last vertex you've added. 
+            </div>
+            <div style="text-indent: 2em;">
+            Click "CancelAddNewConvex" button to cancel current "Adding Convex Object" action, all the vertices you've just added for this convex object will be removed.
+            </div>
+            <div style="text-indent: 2em;">
+            Click "FinishAddConvex" button will add the convex object to the coordinate and you can use it to test the collision detecting. 
+            </div>
+        </div>
     </div>
 </body>
 

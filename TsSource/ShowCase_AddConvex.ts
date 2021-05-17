@@ -51,7 +51,7 @@ module GJKTutorial
         return null;  //wtf ? This should not happen;
     }
 
-    export function InitDrawCustomConvex(framework : Framework, canvas:HTMLCanvasElement, buttonClear:HTMLElement, buttonBeginAdd:HTMLElement, buttonFinishAdd:HTMLElement, buttonCancel:HTMLElement) : void
+    export function InitShowCase_DrawCustomConvex(framework : Framework, canvas:HTMLCanvasElement, buttonClear:HTMLElement, buttonBeginAdd:HTMLElement, buttonFinishAdd:HTMLElement, buttonCancel:HTMLElement) : void
     {
 
         buttonClear.onclick = function()
@@ -64,63 +64,71 @@ module GJKTutorial
 
         let penddingVertices : Vertex[] = [];
 
+        let customDrawPenddingVertex = (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>{
+            if(penddingVertices.length == 0)
+            {
+                return;
+            }
+            context.strokeStyle = 'black';
+            context.lineWidth = 2;
+            let startPos = coord.GetCanvasPosByCoord(penddingVertices[0].coord);
+            for(let i = 0; i < penddingVertices.length; ++i)
+            {
+                let pos = coord.GetCanvasPosByCoord(penddingVertices[i].coord);
+                context.beginPath();
+                context.arc(pos.x, pos.y, 10, 0, 2 * Math.PI, false);
+                context.fillStyle = 'black';
+                context.fill();
+                context.closePath();
+            }
+            context.moveTo(startPos.x, startPos.y);
+            
+            context.beginPath();
+            for(let i = 0; i < penddingVertices.length; ++i)
+            {
+                let pos = coord.GetCanvasPosByCoord(penddingVertices[i].coord);
+                context.lineWidth = 1;
+                context.strokeStyle = 'black';
+                context.lineTo(pos.x, pos.y);
+            }
+            context.stroke();
+            context.closePath();
+        };
+
+
+        let canvasClickListener = (evt : MouseEvent)=>{
+            if(evt.button == 0)
+            {
+                //Left Mouse Button
+                let pos = new Vec2(evt.offsetX, evt.offsetY);
+                let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
+                let excludedNames : string[] = [];
+                penddingVertices.forEach((vertex : Vertex)=>{
+                    excludedNames.push(vertex.name);
+                });
+                let name = GetAvailableCoordinateName(framework, true, excludedNames);
+                let vertex = new Vertex(coord, name);
+                vertex.drawName = false;
+                penddingVertices.push(vertex);
+            }
+        };
+
+        let canvasRightClickListener = function(evt){
+            evt.preventDefault();
+            penddingVertices.pop();
+        };
+
         buttonBeginAdd.onclick = function()
         {
             buttonCancel.removeAttribute("disabled");
             buttonFinishAdd.removeAttribute("disabled");
             buttonBeginAdd.setAttribute("disabled", "true") ;
 
-            canvas.onclick = (evt : MouseEvent)=>{
-                if(evt.button == 0)
-                {
-                    //Left Mouse Button
-                    let pos = new Vec2(evt.offsetX, evt.offsetY);
-                    let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
-                    let excludedNames : string[] = [];
-                    penddingVertices.forEach((vertex : Vertex)=>{
-                        excludedNames.push(vertex.name);
-                    });
-                    let name = GetAvailableCoordinateName(framework, true, excludedNames);
-                    let vertex = new Vertex(coord, name);
-                    vertex.drawName = false;
-                    penddingVertices.push(vertex);
-                }else if(evt.button == 2)
-                {
-                    //Right Mouse Button
-                    penddingVertices.pop();
-                }
-            };
+            canvas.addEventListener('click', canvasClickListener);
+            //RightMouseButton
+            canvas.addEventListener('contextmenu', canvasRightClickListener);
 
-            framework.SetCustomDrawFunctionAfterDrawConvex((coord : Coordinate, context : CanvasRenderingContext2D)=>{
-                if(penddingVertices.length == 0)
-                {
-                    return;
-                }
-                context.strokeStyle = 'black';
-                context.lineWidth = 2;
-                let startPos = coord.GetCanvasPosByCoord(penddingVertices[0].coord);
-                for(let i = 0; i < penddingVertices.length; ++i)
-                {
-                    let pos = coord.GetCanvasPosByCoord(penddingVertices[i].coord);
-                    context.beginPath();
-                    context.arc(pos.x, pos.y, 10, 0, 2 * Math.PI, false);
-                    context.fillStyle = 'black';
-                    context.fill();
-                    context.closePath();
-                }
-                context.moveTo(startPos.x, startPos.y);
-                
-                context.beginPath();
-                for(let i = 0; i < penddingVertices.length; ++i)
-                {
-                    let pos = coord.GetCanvasPosByCoord(penddingVertices[i].coord);
-                    context.lineWidth = 1;
-                    context.strokeStyle = 'black';
-                    context.lineTo(pos.x, pos.y);
-                }
-                context.stroke();
-                context.closePath();
-            });
+            framework.AddCustomDrawFunctionAfterDrawConvex(customDrawPenddingVertex);
         }
         buttonFinishAdd.onclick = function()
         {
@@ -136,6 +144,7 @@ module GJKTutorial
                 convex.AddVertex(vertex);
             }
             convex.name = GetAvailableCoordinateName(framework, false, null);
+            convex.ReOrder();
             if(convex.IsConvex())
             {
                 framework.AddConvex(convex);
@@ -145,17 +154,19 @@ module GJKTutorial
             
 
             penddingVertices = [];
-            canvas.onclick = null;
-            framework.SetCustomDrawFunctionAfterDrawConvex(null);
+            canvas.removeEventListener('click', canvasClickListener);
+            canvas.removeEventListener('contextmenu', canvasRightClickListener);
+            framework.RmvCustomDrawFunctionAfterDrawConvex(customDrawPenddingVertex);
         }
         buttonCancel.onclick = function()
         {
             buttonBeginAdd.removeAttribute("disabled");
             buttonCancel.setAttribute("disabled", "true") ;
             buttonFinishAdd.setAttribute("disabled", "true") ;
-            canvas.onclick = null;
+            canvas.removeEventListener('click', canvasClickListener);
+            canvas.removeEventListener('contextmenu', canvasRightClickListener);
             penddingVertices = [];
-            framework.SetCustomDrawFunctionAfterDrawConvex(null);
+            framework.RmvCustomDrawFunctionAfterDrawConvex(customDrawPenddingVertex);
         }
     }
 }

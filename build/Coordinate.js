@@ -2,8 +2,9 @@ var GJKTutorial;
 (function (GJKTutorial) {
     class Coordinate {
         constructor(inCanvas) {
-            this.coordXMax = 8.5;
-            this.coordYMax = 8.5;
+            this.imageCache = null;
+            this.coordXMax = 16.5;
+            this.coordYMax = 16.5;
             this.canvas = inCanvas;
         }
         get canvasWidth() {
@@ -18,7 +19,11 @@ var GJKTutorial;
         GetCoordByCanvasPos(pos) {
             return new GJKTutorial.Vec2(pos.x / this.canvasWidth * this.coordXMax * 2 - this.coordXMax, this.coordYMax - pos.y / this.canvasHeight * this.coordYMax * 2);
         }
-        Draw(context) {
+        Draw(deltaMs, context) {
+            if (this.imageCache) {
+                context.putImageData(this.imageCache, 0, 0);
+                return;
+            }
             //Draw X and Y Axis
             context.beginPath();
             let coordXMin_Pos = this.GetCanvasPosByCoord(new GJKTutorial.Vec2(-this.coordXMax, 0));
@@ -61,6 +66,7 @@ var GJKTutorial;
             context.stroke();
             context.closePath();
             context.setLineDash([]);
+            this.imageCache = context.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
         }
     }
     GJKTutorial.Coordinate = Coordinate;

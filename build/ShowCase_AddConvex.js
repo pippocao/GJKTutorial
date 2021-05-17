@@ -39,14 +39,14 @@ var GJKTutorial;
         }
         return null; //wtf ? This should not happen;
     }
-    function InitDrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel) {
+    function InitShowCase_DrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel) {
         buttonClear.onclick = function () {
             while (framework.GetConvexObjsCount() > 0) {
                 framework.RemoveConvex(0);
             }
         };
         let penddingVertices = [];
-        let customDrawPenddingVertex = (coord, context) => {
+        let customDrawPenddingVertex = (deltaMs, coord, context) => {
             if (penddingVertices.length == 0) {
                 return;
             }
@@ -72,30 +72,32 @@ var GJKTutorial;
             context.stroke();
             context.closePath();
         };
+        let canvasClickListener = (evt) => {
+            if (evt.button == 0) {
+                //Left Mouse Button
+                let pos = new GJKTutorial.Vec2(evt.offsetX, evt.offsetY);
+                let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
+                let excludedNames = [];
+                penddingVertices.forEach((vertex) => {
+                    excludedNames.push(vertex.name);
+                });
+                let name = GetAvailableCoordinateName(framework, true, excludedNames);
+                let vertex = new GJKTutorial.Vertex(coord, name);
+                vertex.drawName = false;
+                penddingVertices.push(vertex);
+            }
+        };
+        let canvasRightClickListener = function (evt) {
+            evt.preventDefault();
+            penddingVertices.pop();
+        };
         buttonBeginAdd.onclick = function () {
             buttonCancel.removeAttribute("disabled");
             buttonFinishAdd.removeAttribute("disabled");
             buttonBeginAdd.setAttribute("disabled", "true");
-            canvas.onclick = (evt) => {
-                if (evt.button == 0) {
-                    //Left Mouse Button
-                    let pos = new GJKTutorial.Vec2(evt.offsetX, evt.offsetY);
-                    let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
-                    let excludedNames = [];
-                    penddingVertices.forEach((vertex) => {
-                        excludedNames.push(vertex.name);
-                    });
-                    let name = GetAvailableCoordinateName(framework, true, excludedNames);
-                    let vertex = new GJKTutorial.Vertex(coord, name);
-                    vertex.drawName = false;
-                    penddingVertices.push(vertex);
-                }
-            };
+            canvas.addEventListener('click', canvasClickListener);
             //RightMouseButton
-            canvas.oncontextmenu = function (evt) {
-                evt.preventDefault();
-                penddingVertices.pop();
-            };
+            canvas.addEventListener('contextmenu', canvasRightClickListener);
             framework.AddCustomDrawFunctionAfterDrawConvex(customDrawPenddingVertex);
         };
         buttonFinishAdd.onclick = function () {
@@ -117,20 +119,20 @@ var GJKTutorial;
                 window.alert("Only Convex Object are allowed!");
             }
             penddingVertices = [];
-            canvas.onclick = null;
-            canvas.oncontextmenu = null;
+            canvas.removeEventListener('click', canvasClickListener);
+            canvas.removeEventListener('contextmenu', canvasRightClickListener);
             framework.RmvCustomDrawFunctionAfterDrawConvex(customDrawPenddingVertex);
         };
         buttonCancel.onclick = function () {
             buttonBeginAdd.removeAttribute("disabled");
             buttonCancel.setAttribute("disabled", "true");
             buttonFinishAdd.setAttribute("disabled", "true");
-            canvas.onclick = null;
-            canvas.oncontextmenu = null;
+            canvas.removeEventListener('click', canvasClickListener);
+            canvas.removeEventListener('contextmenu', canvasRightClickListener);
             penddingVertices = [];
             framework.RmvCustomDrawFunctionAfterDrawConvex(customDrawPenddingVertex);
         };
     }
-    GJKTutorial.InitDrawCustomConvex = InitDrawCustomConvex;
+    GJKTutorial.InitShowCase_DrawCustomConvex = InitShowCase_DrawCustomConvex;
 })(GJKTutorial || (GJKTutorial = {}));
-//# sourceMappingURL=AddConvex.js.map
+//# sourceMappingURL=ShowCase_AddConvex.js.map

@@ -3,8 +3,9 @@ module GJKTutorial
     export class Coordinate
     {
         private canvas : HTMLCanvasElement;
-        public coordXMax : number = 8.5;
-        public coordYMax : number = 8.5;
+        private imageCache : ImageData = null;
+        public coordXMax : number = 16.5;
+        public coordYMax : number = 16.5;
 
         constructor(inCanvas : HTMLCanvasElement)
         {
@@ -32,8 +33,14 @@ module GJKTutorial
             return new Vec2(pos.x / this.canvasWidth * this.coordXMax * 2 - this.coordXMax, this.coordYMax - pos.y / this.canvasHeight * this.coordYMax * 2);
         }
 
-        public Draw(context : CanvasRenderingContext2D) : void
+        public Draw(deltaMs : number, context : CanvasRenderingContext2D) : void
         {
+            if(this.imageCache)
+            {
+                context.putImageData(this.imageCache, 0, 0);
+                return;
+            }
+
             //Draw X and Y Axis
             context.beginPath();
             let coordXMin_Pos : Vec2 = this.GetCanvasPosByCoord(new Vec2(-this.coordXMax, 0));
@@ -85,6 +92,8 @@ module GJKTutorial
             context.stroke();
             context.closePath();
             context.setLineDash([]);
+
+            this.imageCache = context.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
         }
     }
 }

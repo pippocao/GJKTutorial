@@ -43,17 +43,55 @@ module GJKTutorial
     
         public Dot (rhs : Vec2) : number
         {
-            return this.x * rhs.x + this.y + rhs.y;
+            return this.x * rhs.x + this.y * rhs.y;
         }
 
         public Cross(rhs : Vec2) : number
         {
             return this.x * rhs.y - this.y * rhs.x;
         }
+
+        public RotateCW(degree : number) : Vec2
+        {
+            let radian = degree / 180 * Math.PI;
+            let sin = Math.sin(-radian);
+            let cos = Math.cos(-radian);
+            return new Vec2(this.x * cos - this.y * sin, this.x * sin + this.y * cos);
+        }
+
+        /// 0 - 360
+        public GetDegreeToCW(toVec : Vec2) : number
+        {
+            let thisMag = this.magnitude;
+            let toMag = toVec.magnitude;
+            if(thisMag == 0 || toMag == 0)
+            {
+                return 0;
+            }
+            let cosine = this.Dot(toVec) / (thisMag * toMag);
+
+            let radian = Math.acos(cosine);
+
+            if(this.Cross(toVec) > 0)
+            {
+                radian = 2 * Math.PI - radian;
+            }
+            return radian * 360 / (2 * Math.PI);
+        }
     
         public toString() : string
         {
             return "{" + this.x + "," + this.y + "}";
+        }
+
+        public Normalize() : Vec2
+        {
+            let magnitude = this.magnitude;
+            if(magnitude == 0)
+            {
+                return new Vec2();
+            }
+            return this.Div(magnitude);
         }
     }
 }
