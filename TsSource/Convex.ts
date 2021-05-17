@@ -185,6 +185,23 @@ module GJKTutorial
             return center.Div(sumWeight);
         }
 
+        public Support(dir : Vec2) : Vertex
+        {
+            let maxDot = Number.MIN_VALUE;
+            let supportVertex : Vertex = null;
+            for(let i = 0; i < this.vertices.length; ++i)
+            {
+                let candidiateVertex = this.vertices[i];
+                let dot = candidiateVertex.coord.Dot(dir);
+                if(dot > maxDot)
+                {
+                    maxDot = dot;
+                    supportVertex = candidiateVertex;
+                }
+            }
+            return supportVertex;
+        }
+
         public Draw(deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D) : void
         {
             if(this.vertices.length <= 0)
