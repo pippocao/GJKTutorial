@@ -51,14 +51,18 @@ module GJKTutorial
             }
 
             let firstVertexIndex = -1;
-            let minX = Number.MAX_VALUE;
+            let minX = Number.MAX_SAFE_INTEGER;
+            let maxY = Number.MIN_SAFE_INTEGER;
             for(let i = 0; i < verticesTmp.length; ++i)
             {
-                if(verticesTmp[i].coord.x < minX)
+                if(verticesTmp[i].coord.x < minX
+                    || (verticesTmp[i].coord.x == minX && verticesTmp[i].coord.y > maxY)
+                    )
                 {
                     minX = verticesTmp[i].coord.x;
+                    maxY = verticesTmp[i].coord.y;
+                    firstVertexIndex = i;
                 }
-                firstVertexIndex = i;
             }
             newVerticesTmp.push(verticesTmp.splice(firstVertexIndex, 1)[0]);
             let startVertex = newVerticesTmp[0];
@@ -101,6 +105,11 @@ module GJKTutorial
             
             newVerticesTmp.push(...verticesTmp);
             this.vertices = newVerticesTmp;
+        }
+
+        public Rebuild() : void
+        {
+            this.vertices = GetConvexFromVertices(this.vertices);
         }
 
         public IsConvex() : boolean
@@ -187,7 +196,7 @@ module GJKTutorial
 
         public Support(dir : Vec2) : Vertex
         {
-            let maxDot = Number.MIN_VALUE;
+            let maxDot = Number.MIN_SAFE_INTEGER;
             let supportVertex : Vertex = null;
             for(let i = 0; i < this.vertices.length; ++i)
             {

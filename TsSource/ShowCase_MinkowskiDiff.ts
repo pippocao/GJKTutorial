@@ -15,100 +15,34 @@ module GJKTutorial
         }
         return result;
     }
-
-
-    function GetConvexFromVertices(vertices : Vertex[]) : Convex
-    {
-        let result = new Convex();
-        result.drawName = false;
-
-        let startVertexIndex = -1;
-        for(let i = 0; i < vertices.length; ++i)
-        {
-            let vertex = vertices[i];
-            if(startVertexIndex < 0)
-            {
-                startVertexIndex = i;
-            }else if(vertex.coord.x < vertices[startVertexIndex].coord.x){
-                startVertexIndex = i;
-            }else if(vertex.coord.x == vertices[startVertexIndex].coord.x && vertex.coord.y > vertices[startVertexIndex].coord.y)
-            {
-                startVertexIndex = i;
-            }
-        }
-
-        let startVertex = vertices[startVertexIndex];
-        result.AddVertex(startVertex);
-
-        while(true)
-        {
-            let fromDir = new Vec2(0, 1);   //up direction
-            for(let i = result.GetVertices().length - 1; i > 0; --i)
-            {
-                let dir = result.GetVertices()[i].coord.Sub(result.GetVertices()[i - 1].coord);
-                if(dir.magnitudeSqr != 0)
-                {
-                    fromDir = dir;
-                    break;
-                }
-            }
-            let currentStartCoord = result.GetVertices()[result.GetVertices().length - 1].coord;
-            let nextVertexIndex = -1;
-            let nextVertexDegree = Number.MAX_VALUE;
-            for(let i = 0; i < vertices.length; ++i)
-            {
-                let candidiateCoord = vertices[i].coord;
-                let candidiateDir = candidiateCoord.Sub(currentStartCoord);
-                if(Math.abs(candidiateDir.x) < Number.EPSILON && Math.abs(candidiateDir.y) < Number.EPSILON)
-                {
-                    //ignore overlapping vertex
-                    continue;
-                }
-                let candidiateDegreeCw = fromDir.GetDegreeToCW(candidiateDir);
-                if(candidiateDegreeCw < nextVertexDegree)
-                {
-                    nextVertexIndex = i;
-                    nextVertexDegree = candidiateDegreeCw;
-                }
-            }
-
-            let nextVertex = vertices[nextVertexIndex];
-            if(nextVertex == startVertex)
-            {
-                break;
-            }
-            result.AddVertex(nextVertex);
-        }
-
-        return result;
-    }
-
+    
 
     export function InitShowCase_MinkowskiDiff(framework : Framework, buttonShowMinkowskiDiff:HTMLElement) : void
     {
         let drawEdgeNum = -1;
         let timeBeginMs = 0;
         let allVertices : Vertex[] = [];
-        let diffConv:Convex = null;
         let drawFullMinkowskiDiff = (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>{
             if(framework.GetConvexObjsCount() != 2 || drawEdgeNum == -1)
             {
                 return;
             }
             allVertices = GetFullMinkowskiDiffVertices(framework.GetConvex(1), framework.GetConvex(0));
-            diffConv = GetConvexFromVertices(allVertices);
-            if(diffConv.GetVertices().length < 3)
+            
+            let diffOutlineVertices = GetConvexFromVertices(allVertices);
+
+            if(diffOutlineVertices.length < 3)
             {
                 return;
             }
 
-            if(drawEdgeNum > diffConv.GetVertices().length + 1)
+            if(drawEdgeNum > diffOutlineVertices.length + 1)
             {
                 drawEdgeNum = -1;
                 return;
             }
 
-            let finishedDrawAllEdges = (drawEdgeNum > diffConv.GetVertices().length);
+            let finishedDrawAllEdges = (drawEdgeNum > diffOutlineVertices.length);
 
             //Draw Candidiate Vertices When Show Animation
             if(!finishedDrawAllEdges)
@@ -129,15 +63,15 @@ module GJKTutorial
             }
 
             //Draw Edges
-            let startPos = coord.GetCanvasPosByCoord(diffConv.GetVertices()[0].coord);
+            let startPos = coord.GetCanvasPosByCoord(diffOutlineVertices[0].coord);
             context.moveTo(startPos.x, startPos.y);
             context.beginPath();
             context.setLineDash([]);  //solidLine
             context.strokeStyle = 'green';
             context.lineWidth = finishedDrawAllEdges ? 0.5 : 2;
-            for(let i = 0; i < Math.min(diffConv.GetVertices().length + 1, drawEdgeNum); ++i)
+            for(let i = 0; i < Math.min(diffOutlineVertices.length + 1, drawEdgeNum); ++i)
             {
-                let pos = coord.GetCanvasPosByCoord(diffConv.GetVertices()[i % diffConv.GetVertices().length].coord);
+                let pos = coord.GetCanvasPosByCoord(diffOutlineVertices[i % diffOutlineVertices.length].coord);
                 context.lineTo(pos.x, pos.y);
             }
             context.stroke();
@@ -154,13 +88,13 @@ module GJKTutorial
                 let fromDir = new Vec2(0, 1);
                 if(drawEdgeNum > 1)
                 {
-                    fromDir = diffConv.GetVertices()[drawEdgeNum - 1].coord.Sub(diffConv.GetVertices()[drawEdgeNum - 2].coord);
+                    fromDir = diffOutlineVertices[drawEdgeNum - 1].coord.Sub(diffOutlineVertices[drawEdgeNum - 2].coord);
                 }
-                let targetDir = diffConv.GetVertices()[drawEdgeNum % diffConv.GetVertices().length].coord.Sub(diffConv.GetVertices()[drawEdgeNum - 1].coord);
+                let targetDir = diffOutlineVertices[drawEdgeNum % diffOutlineVertices.length].coord.Sub(diffOutlineVertices[drawEdgeNum - 1].coord);
                 let currentDir = new Vec2(targetDir.x, targetDir.y);
                 let targetDegree = fromDir.GetDegreeToCW(targetDir);
     
-                let startPosAnim = coord.GetCanvasPosByCoord(diffConv.GetVertices()[drawEdgeNum - 1].coord);
+                let startPosAnim = coord.GetCanvasPosByCoord(diffOutlineVertices[drawEdgeNum - 1].coord);
                 context.moveTo(startPosAnim.x, startPosAnim.y);
                 context.beginPath();
                 let currentDegree = (Date.now() - timeBeginMs) * 0.1;
@@ -177,7 +111,7 @@ module GJKTutorial
                 }
                 currentDir = currentDir.Normalize().Mul(coord.coordXMax);
     
-                let targetPos = coord.GetCanvasPosByCoord(diffConv.GetVertices()[drawEdgeNum - 1].coord.Add(currentDir));
+                let targetPos = coord.GetCanvasPosByCoord(diffOutlineVertices[drawEdgeNum - 1].coord.Add(currentDir));
                 context.lineTo(startPosAnim.x, startPosAnim.y);
                 context.lineTo(targetPos.x, targetPos.y);
                 context.stroke();
@@ -188,7 +122,7 @@ module GJKTutorial
             //name of Vertices
             if(finishedDrawAllEdges)
             {
-                diffConv.GetVertices().forEach((vertex)=>{
+                diffOutlineVertices.forEach((vertex)=>{
                     let pos = coord.GetCanvasPosByCoord(vertex.coord);
                     context.fillStyle = 'green';
                     context.font = "20px Arial";

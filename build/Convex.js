@@ -34,12 +34,15 @@ var GJKTutorial;
                 return;
             }
             let firstVertexIndex = -1;
-            let minX = Number.MAX_VALUE;
+            let minX = Number.MAX_SAFE_INTEGER;
+            let maxY = Number.MIN_SAFE_INTEGER;
             for (let i = 0; i < verticesTmp.length; ++i) {
-                if (verticesTmp[i].coord.x < minX) {
+                if (verticesTmp[i].coord.x < minX
+                    || (verticesTmp[i].coord.x == minX && verticesTmp[i].coord.y > maxY)) {
                     minX = verticesTmp[i].coord.x;
+                    maxY = verticesTmp[i].coord.y;
+                    firstVertexIndex = i;
                 }
-                firstVertexIndex = i;
             }
             newVerticesTmp.push(verticesTmp.splice(firstVertexIndex, 1)[0]);
             let startVertex = newVerticesTmp[0];
@@ -72,6 +75,9 @@ var GJKTutorial;
             });
             newVerticesTmp.push(...verticesTmp);
             this.vertices = newVerticesTmp;
+        }
+        Rebuild() {
+            this.vertices = GJKTutorial.GetConvexFromVertices(this.vertices);
         }
         IsConvex() {
             if (this.vertices.length < 3) {
@@ -132,6 +138,19 @@ var GJKTutorial;
                 sumWeight += weight;
             }
             return center.Div(sumWeight);
+        }
+        Support(dir) {
+            let maxDot = Number.MIN_SAFE_INTEGER;
+            let supportVertex = null;
+            for (let i = 0; i < this.vertices.length; ++i) {
+                let candidiateVertex = this.vertices[i];
+                let dot = candidiateVertex.coord.Dot(dir);
+                if (dot > maxDot) {
+                    maxDot = dot;
+                    supportVertex = candidiateVertex;
+                }
+            }
+            return supportVertex;
         }
         Draw(deltaMs, coord, context) {
             if (this.vertices.length <= 0) {

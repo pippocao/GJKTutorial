@@ -1,16 +1,6 @@
 //This is for draw custom convex on the coordinate
 var GJKTutorial;
 (function (GJKTutorial) {
-    function GetNameFromCustomCharCode(code, isSmallCase) {
-        let startAsciiCode = isSmallCase ? 97 : 65; //97 is ascii code of letter 'a' while 65 is that of letter 'A';
-        let name = '';
-        do {
-            let tail = code % 26;
-            name = String.fromCharCode(startAsciiCode + tail) + name;
-            code = (code - tail) / 26;
-        } while (code > 0);
-        return name;
-    }
     function GetAvailableCoordinateName(framework, isSmallCase, excludedNames) {
         let currentCharCodesSet = {};
         for (let i = 0; i < framework.GetConvexObjsCount(); ++i) {
@@ -31,7 +21,7 @@ var GJKTutorial;
         }
         let code = 0; //custom code of latter 'a';
         while (true) {
-            let name = GetNameFromCustomCharCode(code, isSmallCase);
+            let name = GJKTutorial.DecodeCustomCharCode(code, isSmallCase);
             if (!currentCharCodesSet[name]) {
                 return name;
             }
@@ -60,6 +50,7 @@ var GJKTutorial;
                 context.fillStyle = 'black';
                 context.fill();
                 context.closePath();
+                context.fillText(penddingVertices[i].name, pos.x, pos.y);
             }
             context.moveTo(startPos.x, startPos.y);
             context.beginPath();

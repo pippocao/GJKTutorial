@@ -31,6 +31,12 @@ var GJKTutorial;
         Cross(rhs) {
             return this.x * rhs.y - this.y * rhs.x;
         }
+        Equals(rhs) {
+            return (Math.abs(this.x - rhs.x) < Number.EPSILON) && (Math.abs(this.y - rhs.y) < Number.EPSILON);
+        }
+        Clone() {
+            return new Vec2(this.x, this.y);
+        }
         RotateCW(degree) {
             let radian = degree / 180 * Math.PI;
             let sin = Math.sin(-radian);

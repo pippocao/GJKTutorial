@@ -2,17 +2,6 @@
 
 module GJKTutorial
 {
-    function GetNameFromCustomCharCode(code : number, isSmallCase : boolean) : string
-    {
-        let startAsciiCode : number = isSmallCase ? 97 : 65; //97 is ascii code of letter 'a' while 65 is that of letter 'A';
-        let name ='';
-        do{
-            let tail = code % 26;
-            name = String.fromCharCode(startAsciiCode + tail) + name;    
-            code = (code - tail) / 26;
-        }while(code > 0);
-        return name;
-    }
 
     function GetAvailableCoordinateName(framework : Framework, isSmallCase : boolean, excludedNames : string[]) : string
     {
@@ -41,7 +30,7 @@ module GJKTutorial
         let code = 0;  //custom code of latter 'a';
         while(true)
         {
-            let name = GetNameFromCustomCharCode(code, isSmallCase);
+            let name = DecodeCustomCharCode(code, isSmallCase);
             if(!currentCharCodesSet[name])
             {
                 return name;
@@ -80,6 +69,7 @@ module GJKTutorial
                 context.fillStyle = 'black';
                 context.fill();
                 context.closePath();
+                context.fillText(penddingVertices[i].name, pos.x, pos.y);
             }
             context.moveTo(startPos.x, startPos.y);
             

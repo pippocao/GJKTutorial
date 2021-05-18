@@ -51,6 +51,16 @@ module GJKTutorial
             return this.x * rhs.y - this.y * rhs.x;
         }
 
+        public Equals(rhs : Vec2) : boolean
+        {
+            return (Math.abs(this.x - rhs.x) < Number.EPSILON) && (Math.abs(this.y - rhs.y) < Number.EPSILON);
+        }
+
+        public Clone() : Vec2
+        {
+            return new Vec2(this.x, this.y);
+        }
+
         public RotateCW(degree : number) : Vec2
         {
             let radian = degree / 180 * Math.PI;

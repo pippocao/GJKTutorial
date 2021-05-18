@@ -136,18 +136,17 @@ module GJKTutorial
     
         /////////////////////Default Convex Objects////////////////////
         let conv = new Convex();
-        conv.AddVertex(new Vertex(new Vec2(3, 4), "a"));
+        conv.AddVertex(new Vertex(new Vec2(6, 8), "a"));
         conv.AddVertex(new Vertex(new Vec2(5, 2), "b"));
-        conv.AddVertex(new Vertex(new Vec2(-5, -4), "c"));
-        conv.AddVertex(new Vertex(new Vec2(-8, -2), "d"));
+        conv.AddVertex(new Vertex(new Vec2(1, 6), "c"));
         conv.name = "A";
         framework.AddConvex(conv);
     
         
         conv = new Convex();
-        conv.AddVertex(new Vertex(new Vec2(6, 4), "e"));
-        conv.AddVertex(new Vertex(new Vec2(2, 2), "f"));
-        conv.AddVertex(new Vertex(new Vec2(-5, -4), "g"));
+        conv.AddVertex(new Vertex(new Vec2(6, 4), "d"));
+        conv.AddVertex(new Vertex(new Vec2(2, 2), "e"));
+        conv.AddVertex(new Vertex(new Vec2(5, -2), "f"));
         conv.name = "B";
         framework.AddConvex(conv);
         /////////////////////Default Convex Objects////////////////////
@@ -169,6 +168,12 @@ module GJKTutorial
         /////////////////////Full Minkowski Difference Preview////////////////////
 
 
+        //////////////////////GJK Step Demonstration////////////////////////////
+        let buttonGJKStep = document.getElementById("GJKStep");
+        let buttonGJKUndo = document.getElementById("GJKUndoStep");
+        let buttonGJKClear = document.getElementById("GJKClear");
+        InitShowCase_DrawGJKStep(framework, canvas, buttonGJKStep, buttonGJKUndo, buttonGJKClear);
+        //////////////////////GJK Step Demonstration////////////////////////////
 
 
         /////////////////////////Drag Convex///////////////////////////////////

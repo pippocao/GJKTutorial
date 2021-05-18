@@ -4,8 +4,8 @@ module GJKTutorial
     {
         private canvas : HTMLCanvasElement;
         private imageCache : ImageData = null;
-        public coordXMax : number = 16.5;
-        public coordYMax : number = 16.5;
+        private _coordXMax : number = 16.5;
+        private _coordYMax : number = 16.5;
 
         constructor(inCanvas : HTMLCanvasElement)
         {
@@ -20,6 +20,28 @@ module GJKTutorial
         get canvasHeight() : number
         {
             return this.canvas.height;
+        }
+
+        get coordXMax() : number
+        {
+            return this._coordXMax;
+        }
+
+        get coordYMax() : number
+        {
+            return this._coordYMax;
+        }
+
+        set coordXMax(xMax : number)
+        {
+            this._coordXMax = xMax;
+            this.imageCache = null;
+        }
+
+        set coordYMax(yMax : number)
+        {
+            this._coordYMax = yMax;
+            this.imageCache = null;
         }
 
         public GetCanvasPosByCoord(coord : Vec2) : Vec2
