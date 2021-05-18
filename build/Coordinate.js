@@ -3,8 +3,8 @@ var GJKTutorial;
     class Coordinate {
         constructor(inCanvas) {
             this.imageCache = null;
-            this.coordXMax = 16.5;
-            this.coordYMax = 16.5;
+            this._coordXMax = 16.5;
+            this._coordYMax = 16.5;
             this.canvas = inCanvas;
         }
         get canvasWidth() {
@@ -12,6 +12,20 @@ var GJKTutorial;
         }
         get canvasHeight() {
             return this.canvas.height;
+        }
+        get coordXMax() {
+            return this._coordXMax;
+        }
+        get coordYMax() {
+            return this._coordYMax;
+        }
+        set coordXMax(xMax) {
+            this._coordXMax = xMax;
+            this.imageCache = null;
+        }
+        set coordYMax(yMax) {
+            this._coordYMax = yMax;
+            this.imageCache = null;
         }
         GetCanvasPosByCoord(coord) {
             return new GJKTutorial.Vec2(this.canvasWidth / 2 * coord.x / this.coordXMax + this.canvasWidth / 2, this.canvasHeight / 2 - this.canvasHeight / 2 * coord.y / this.coordYMax);

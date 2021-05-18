@@ -7,16 +7,31 @@ module GJKTutorial
             return this.IsPointInConvex(new Vec2(0, 0));
         }
 
-        public GetNearestCloseToOriginVerteices(num : number) : Vertex[]
+        //return null if vertices count is less than 2.
+        public GetClosestEdgeToOrigin() : ReadonlyArray<Vertex>
         {
-            let resultVertices = [...this.GetVertices()];
-            if(resultVertices.length > num)
+            if(this.GetVertices().length < 2)
             {
-                //only reserve 2 vertices who are nearest to Origin(0, 0);
-                resultVertices.sort((a, b)=>{
-                    return a.coord.magnitudeSqr - b.coord.magnitudeSqr;
-                })
-                resultVertices = resultVertices.slice(0, num);
+                return null;
+            }else if(this.GetVertices().length == 2)
+            {
+                return this.GetVertices();
+            }
+            let closestDistanceSqr = Number.MAX_SAFE_INTEGER;
+            let resultVertices : Vertex[] = [null, null];
+            let origin:Readonly<Vec2> = new Vec2(0, 0);
+            for(let i = 0; i < this.GetVertices().length; ++i)
+            {
+                let p0 = this.GetVertices()[i];
+                let p1 = this.GetVertices()[(i + 1) % this.GetVertices().length];
+
+                let distanceSqr = PointDistanceToSegmentSqr(origin, p0.coord, p1.coord);
+                if(distanceSqr < closestDistanceSqr)
+                {
+                    closestDistanceSqr = distanceSqr;
+                    resultVertices[0] = p0;
+                    resultVertices[1] = p1;
+                }
             }
             return resultVertices;
         }
@@ -24,8 +39,8 @@ module GJKTutorial
         //result maybe null if vertices count is less than 2
         public GetBestNextSupportDir() : Vec2
         {
-            let nearestVertices = this.GetNearestCloseToOriginVerteices(2);
-            if(nearestVertices.length < 2)
+            let nearestVertices = this.GetClosestEdgeToOrigin();
+            if(!nearestVertices)
             {
                 return null;
             }

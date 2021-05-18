@@ -139,7 +139,7 @@ module GJKTutorial
                 currentSupportDir = convexB.GetCenterCoord().Sub(convexA.GetCenterCoord());
                 currentSupportDirStartCoord = convexA.GetCenterCoord();
             }else{
-                let nearestVertices = stepResult.simplex.GetNearestCloseToOriginVerteices(2);
+                let nearestVertices = stepResult.simplex.GetClosestEdgeToOrigin();
                 currentSupportDirStartCoord = nearestVertices[0].coord.Add(nearestVertices[1].coord).Div(2);
             }
         }

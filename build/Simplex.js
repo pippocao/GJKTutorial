@@ -4,21 +4,33 @@ var GJKTutorial;
         IncludeOrigin() {
             return this.IsPointInConvex(new GJKTutorial.Vec2(0, 0));
         }
-        GetNearestCloseToOriginVerteices(num) {
-            let resultVertices = [...this.GetVertices()];
-            if (resultVertices.length > num) {
-                //only reserve 2 vertices who are nearest to Origin(0, 0);
-                resultVertices.sort((a, b) => {
-                    return a.coord.magnitudeSqr - b.coord.magnitudeSqr;
-                });
-                resultVertices = resultVertices.slice(0, num);
+        //return null if vertices count is less than 2.
+        GetClosestEdgeToOrigin() {
+            if (this.GetVertices().length < 2) {
+                return null;
+            }
+            else if (this.GetVertices().length == 2) {
+                return this.GetVertices();
+            }
+            let closestDistanceSqr = Number.MAX_SAFE_INTEGER;
+            let resultVertices = [null, null];
+            let origin = new GJKTutorial.Vec2(0, 0);
+            for (let i = 0; i < this.GetVertices().length; ++i) {
+                let p0 = this.GetVertices()[i];
+                let p1 = this.GetVertices()[(i + 1) % this.GetVertices().length];
+                let distanceSqr = GJKTutorial.PointDistanceToSegmentSqr(origin, p0.coord, p1.coord);
+                if (distanceSqr < closestDistanceSqr) {
+                    closestDistanceSqr = distanceSqr;
+                    resultVertices[0] = p0;
+                    resultVertices[1] = p1;
+                }
             }
             return resultVertices;
         }
         //result maybe null if vertices count is less than 2
         GetBestNextSupportDir() {
-            let nearestVertices = this.GetNearestCloseToOriginVerteices(2);
-            if (nearestVertices.length < 2) {
+            let nearestVertices = this.GetClosestEdgeToOrigin();
+            if (!nearestVertices) {
                 return null;
             }
             let dir = nearestVertices[0].coord.Sub(nearestVertices[1].coord);

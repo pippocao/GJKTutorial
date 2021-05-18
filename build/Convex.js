@@ -18,6 +18,9 @@ var GJKTutorial;
         RemoveVertex(index) {
             this.vertices.splice(index, 1);
         }
+        SetVertices(vertices) {
+            this.vertices = [...vertices];
+        }
         GetVertices() {
             return this.vertices;
         }

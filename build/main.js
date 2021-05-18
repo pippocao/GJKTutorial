@@ -27,6 +27,11 @@ var GJKTutorial;
             this.customDrawsAfterDrawConvex.forEach(element => {
                 element(deltaMs, this.coord, this.context);
             });
+            if (this.convexObjs.length == 2) {
+                if (GJKTutorial.GJKTest(this.convexObjs[0], this.convexObjs[1]) != null) {
+                    this.context.fillRect(0, 0, 20, 20);
+                }
+            }
         }
         AddCustomDrawFunctionBeforeDrawConvex(func) {
             this.customDrawsBeforeDrawConvex.push(func);

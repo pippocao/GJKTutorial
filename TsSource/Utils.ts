@@ -41,7 +41,7 @@ module GJKTutorial
         return result;
     }
     
-    //try to make a convex as small as possible to surround all the vertices
+    //try to make a convex as small as possible to surround all the input vertices
     //the return value is in cw order, may be some inner vertices will be discarded.
     export function GetConvexFromVertices(vertices : Vertex[]) : Vertex[]
     {
@@ -107,6 +107,24 @@ module GJKTutorial
 
         return result;
     }
+
+      
+      
+    export function PointDistanceToSegmentSqr (point : Vec2, segmentP0 : Vec2, segmentP1 : Vec2) : number{
+        let l2 = segmentP0.Sub(segmentP1).magnitudeSqr;
+        if (l2 === 0) 
+        {
+            return segmentP0.Sub(point).magnitudeSqr;
+        }
+        let t = ((point.x - segmentP0.x) * (segmentP1.x - segmentP0.x) + (point.y - segmentP0.y) * (segmentP1.y - segmentP0.y)) / l2;
+        t = Math.max(0, Math.min(1, t));
+        return new Vec2(segmentP0.x + t * (segmentP1.x - segmentP0.x), segmentP0.y + t * (segmentP1.y - segmentP0.y)).Sub(point).magnitudeSqr;
+      }
+      
+      
+      export function PointDistanceToSegment (point : Vec2, segmentP0 : Vec2, segmentP1 : Vec2) {
+        return Math.sqrt(PointDistanceToSegmentSqr(point, segmentP0, segmentP1));
+      }
 
 
     //draw a directional arrow

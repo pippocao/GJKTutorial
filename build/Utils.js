@@ -37,7 +37,7 @@ var GJKTutorial;
         return result;
     }
     GJKTutorial.EncodeCustomCharCode = EncodeCustomCharCode;
-    //try to make a convex as small as possible to surround all the vertices
+    //try to make a convex as small as possible to surround all the input vertices
     //the return value is in cw order, may be some inner vertices will be discarded.
     function GetConvexFromVertices(vertices) {
         let result = [];
@@ -90,6 +90,20 @@ var GJKTutorial;
         return result;
     }
     GJKTutorial.GetConvexFromVertices = GetConvexFromVertices;
+    function PointDistanceToSegmentSqr(point, segmentP0, segmentP1) {
+        let l2 = segmentP0.Sub(segmentP1).magnitudeSqr;
+        if (l2 === 0) {
+            return segmentP0.Sub(point).magnitudeSqr;
+        }
+        let t = ((point.x - segmentP0.x) * (segmentP1.x - segmentP0.x) + (point.y - segmentP0.y) * (segmentP1.y - segmentP0.y)) / l2;
+        t = Math.max(0, Math.min(1, t));
+        return new GJKTutorial.Vec2(segmentP0.x + t * (segmentP1.x - segmentP0.x), segmentP0.y + t * (segmentP1.y - segmentP0.y)).Sub(point).magnitudeSqr;
+    }
+    GJKTutorial.PointDistanceToSegmentSqr = PointDistanceToSegmentSqr;
+    function PointDistanceToSegment(point, segmentP0, segmentP1) {
+        return Math.sqrt(PointDistanceToSegmentSqr(point, segmentP0, segmentP1));
+    }
+    GJKTutorial.PointDistanceToSegment = PointDistanceToSegment;
     //draw a directional arrow
     function drawArrow(context, startPos, endPos, arrowLength, width, color) {
         context.lineWidth = width;

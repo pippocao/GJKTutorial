@@ -27,6 +27,11 @@ module GJKTutorial
             this.vertices.splice(index, 1);
         }
 
+        public SetVertices(vertices : ReadonlyArray<Vertex>) : void
+        {
+            this.vertices = [...vertices];
+        }
+
         public GetVertices() : ReadonlyArray<Vertex>
         {
             return this.vertices;
