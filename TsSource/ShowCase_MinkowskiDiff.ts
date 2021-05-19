@@ -23,11 +23,16 @@ module GJKTutorial
         let timeBeginMs = 0;
         let allVertices : Vertex[] = [];
         let drawFullMinkowskiDiff = (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>{
-            if(framework.GetConvexObjsCount() != 2 || drawEdgeNum == -1)
+            
+            let convexAB = framework.GetConvexAB();
+            if(!convexAB || drawEdgeNum == -1)
             {
-                return;
+                return null;
             }
-            allVertices = GetFullMinkowskiDiffVertices(framework.GetConvex(1), framework.GetConvex(0));
+            let convexA = convexAB.A;
+            let convexB = convexAB.B;
+            
+            allVertices = GetFullMinkowskiDiffVertices(convexA, convexB);
             
             let diffOutlineVertices = GetConvexFromVertices(allVertices);
 

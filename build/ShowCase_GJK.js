@@ -83,15 +83,12 @@ var GJKTutorial;
             }
         };
         gjkStepBtn.onclick = (evt) => {
-            if (framework.GetConvexObjsCount() != 2) {
-                return;
+            let convexAB = framework.GetConvexAB();
+            if (!convexAB) {
+                return null;
             }
-            let convexObjs = [framework.GetConvex(0), framework.GetConvex(1)];
-            convexObjs.sort((a, b) => {
-                return GJKTutorial.EncodeCustomCharCode(b.name) - GJKTutorial.EncodeCustomCharCode(a.name);
-            });
-            let convexA = convexObjs[0];
-            let convexB = convexObjs[1];
+            let convexA = convexAB.A;
+            let convexB = convexAB.B;
             let lastStepResult = stepStack.length > 0 ? stepStack[stepStack.length - 1] : null;
             if (!lastStepResult) {
                 //it's the first step, we specify the dir from convexB to convexA as the support dir
@@ -101,7 +98,7 @@ var GJKTutorial;
             stepResult['supportDirStart'] = currentSupportDirStartCoord;
             stepStack.push(stepResult);
             //give a suggested support dir
-            currentSupportDir = stepResult.simplex.GetBestNextSupportDir();
+            currentSupportDir = GJKTutorial.GJKGetBestNextSupportDir(stepResult.simplex);
             if (!currentSupportDir) {
                 //after first step, there is only 1 vertex in simplex, so we must specify a support dir.
                 currentSupportDir = convexB.GetCenterCoord().Sub(convexA.GetCenterCoord());

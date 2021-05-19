@@ -4,6 +4,15 @@ var GJKTutorial;
         IncludeOrigin() {
             return this.IsPointInConvex(new GJKTutorial.Vec2(0, 0));
         }
+        AddVertex(vertex) {
+            super.AddVertex(vertex);
+        }
+        SetVertices(vertices) {
+            super.SetVertices(vertices);
+        }
+        GetVertices() {
+            return super.GetVertices();
+        }
         //return null if vertices count is less than 2.
         GetClosestEdgeToOrigin() {
             if (this.GetVertices().length < 2) {
@@ -26,19 +35,6 @@ var GJKTutorial;
                 }
             }
             return resultVertices;
-        }
-        //result maybe null if vertices count is less than 2
-        GetBestNextSupportDir() {
-            let nearestVertices = this.GetClosestEdgeToOrigin();
-            if (!nearestVertices) {
-                return null;
-            }
-            let dir = nearestVertices[0].coord.Sub(nearestVertices[1].coord);
-            let supportDir = new GJKTutorial.Vec2(-dir.y, dir.x);
-            if (nearestVertices[0].coord.Dot(supportDir) > 0) {
-                supportDir = supportDir.Mul(-1);
-            }
-            return supportDir;
         }
     }
     GJKTutorial.Simplex = Simplex;

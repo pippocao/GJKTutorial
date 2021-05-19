@@ -104,6 +104,21 @@ var GJKTutorial;
         return Math.sqrt(PointDistanceToSegmentSqr(point, segmentP0, segmentP1));
     }
     GJKTutorial.PointDistanceToSegment = PointDistanceToSegment;
+    function NearestPointOnSegment(point, segmentP0, segmentP1) {
+        let dot0 = segmentP1.Sub(segmentP0).Dot(point.Sub(segmentP0));
+        if (dot0 <= 0) {
+            return segmentP0.Clone();
+        }
+        let dot1 = segmentP0.Sub(segmentP1).Dot(point.Sub(segmentP1));
+        if (dot1 <= 0) {
+            return segmentP1.Clone();
+        }
+        let dir = segmentP1.Sub(segmentP0);
+        let lengthSqr = dir.magnitudeSqr;
+        let result = segmentP0.Add(dir.Mul(dot0 / lengthSqr));
+        return result;
+    }
+    GJKTutorial.NearestPointOnSegment = NearestPointOnSegment;
     //draw a directional arrow
     function drawArrow(context, startPos, endPos, arrowLength, width, color) {
         context.lineWidth = width;

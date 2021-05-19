@@ -119,12 +119,31 @@ module GJKTutorial
         let t = ((point.x - segmentP0.x) * (segmentP1.x - segmentP0.x) + (point.y - segmentP0.y) * (segmentP1.y - segmentP0.y)) / l2;
         t = Math.max(0, Math.min(1, t));
         return new Vec2(segmentP0.x + t * (segmentP1.x - segmentP0.x), segmentP0.y + t * (segmentP1.y - segmentP0.y)).Sub(point).magnitudeSqr;
-      }
+    }
       
       
-      export function PointDistanceToSegment (point : Vec2, segmentP0 : Vec2, segmentP1 : Vec2) {
+    export function PointDistanceToSegment (point : Vec2, segmentP0 : Vec2, segmentP1 : Vec2) {
         return Math.sqrt(PointDistanceToSegmentSqr(point, segmentP0, segmentP1));
-      }
+    }
+
+
+    export function NearestPointOnSegment (point : Vec2, segmentP0 : Vec2, segmentP1 : Vec2) : Vec2
+    {
+        let dot0 = segmentP1.Sub(segmentP0).Dot(point.Sub(segmentP0));
+        if(dot0 <= 0)
+        {
+            return segmentP0.Clone();
+        }
+        let dot1 = segmentP0.Sub(segmentP1).Dot(point.Sub(segmentP1));
+        if(dot1 <= 0)
+        {
+            return segmentP1.Clone();
+        }
+        let dir = segmentP1.Sub(segmentP0);
+        let lengthSqr = dir.magnitudeSqr;
+        let result = segmentP0.Add(dir.Mul(dot0 / lengthSqr));
+        return result;
+    }
 
 
     //draw a directional arrow

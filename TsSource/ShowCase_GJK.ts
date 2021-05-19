@@ -110,17 +110,14 @@ module GJKTutorial
 
 
         gjkStepBtn.onclick = (evt)=>{
-            if(framework.GetConvexObjsCount() != 2)
+            let convexAB = framework.GetConvexAB();
+            if(!convexAB)
             {
-                return;
+                return null;
             }
-            let convexObjs = [framework.GetConvex(0), framework.GetConvex(1)];
-            convexObjs.sort((a, b)=>{
-                return EncodeCustomCharCode(b.name) - EncodeCustomCharCode(a.name);
-            });
-
-            let convexA = convexObjs[0];
-            let convexB = convexObjs[1];
+            let convexA = convexAB.A;
+            let convexB = convexAB.B;
+            
             let lastStepResult = stepStack.length > 0 ? stepStack[stepStack.length - 1] : null;
             if(!lastStepResult)
             {
@@ -132,7 +129,7 @@ module GJKTutorial
             stepStack.push(stepResult);
 
             //give a suggested support dir
-            currentSupportDir = stepResult.simplex.GetBestNextSupportDir();
+            currentSupportDir = GJKGetBestNextSupportDir(stepResult.simplex);
             if(!currentSupportDir)
             {
                 //after first step, there is only 1 vertex in simplex, so we must specify a support dir.

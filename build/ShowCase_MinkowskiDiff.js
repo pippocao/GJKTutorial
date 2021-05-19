@@ -17,10 +17,13 @@ var GJKTutorial;
         let timeBeginMs = 0;
         let allVertices = [];
         let drawFullMinkowskiDiff = (deltaMs, coord, context) => {
-            if (framework.GetConvexObjsCount() != 2 || drawEdgeNum == -1) {
-                return;
+            let convexAB = framework.GetConvexAB();
+            if (!convexAB || drawEdgeNum == -1) {
+                return null;
             }
-            allVertices = GetFullMinkowskiDiffVertices(framework.GetConvex(1), framework.GetConvex(0));
+            let convexA = convexAB.A;
+            let convexB = convexAB.B;
+            allVertices = GetFullMinkowskiDiffVertices(convexA, convexB);
             let diffOutlineVertices = GJKTutorial.GetConvexFromVertices(allVertices);
             if (diffOutlineVertices.length < 3) {
                 return;
