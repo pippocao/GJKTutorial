@@ -209,6 +209,25 @@ module GJKTutorial
             }
         }
     }
-
     ///////////////////////////////////////////////////////////////EPA Part///////////////////////////////////////////////////////////
+
+
+    
+    ///////////////////////////////////////////////////////////////GJK Raycast Part///////////////////////////////////////////////////
+    export class GJKRaycastStepResult
+    {
+        public lamda : number = 0;    //current length of the ray
+        public supportDir : Vec2 = new Vec2();
+        public simplex : Simplex = new Simplex();
+    }
+
+    export function GJKRaycast(convexA : Convex, convexB : Convex, ray : Raycast, lastStep? : GJKRaycastStepResult) : GJKRaycastStepResult
+    {
+        if(!lastStep)
+        {
+            //it's first step
+        }
+        return null;
+    }
+    ///////////////////////////////////////////////////////////////GJK Raycast Part///////////////////////////////////////////////////
 }
