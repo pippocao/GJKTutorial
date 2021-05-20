@@ -71,14 +71,17 @@ var GJKTutorial;
         });
         gjkClearBtn.onclick = (evt) => {
             stepStack = [];
+            GJKTutorial.EnableDraggingConvexObj();
         };
         gjkUndoBtn.onclick = (evt) => {
-            let undoStep = stepStack.pop();
-            if (undoStep) {
-                currentSupportDir = undoStep.supportDir;
-                currentSupportDirStartCoord = undoStep['supportDirStart'];
-                if (!currentSupportDirStartCoord) {
-                    currentSupportDirStartCoord = new GJKTutorial.Vec2(0, 0);
+            if (stepStack.length > 1) {
+                let undoStep = stepStack.pop();
+                if (undoStep) {
+                    currentSupportDir = undoStep.supportDir;
+                    currentSupportDirStartCoord = undoStep['supportDirStart'];
+                    if (!currentSupportDirStartCoord) {
+                        currentSupportDirStartCoord = new GJKTutorial.Vec2(0, 0);
+                    }
                 }
             }
         };
@@ -91,6 +94,7 @@ var GJKTutorial;
             let convexB = convexAB.B;
             let lastStepResult = stepStack.length > 0 ? stepStack[stepStack.length - 1] : null;
             if (!lastStepResult) {
+                GJKTutorial.DisableDraggingConvexObj();
                 //it's the first step, we specify the dir from convexB to convexA as the support dir
                 currentSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
             }

@@ -159,7 +159,7 @@ module GJKTutorial
     {
         //draw the penetration vertices.
         let closestEdgeToOrigin = step.simplex.GetClosestEdgeToOrigin();
-        let closestToOriginPointOnEdge = NearestPointOnSegment(new Vec2(0, 0), closestEdgeToOrigin[0].coord, closestEdgeToOrigin[1].coord);
+        let closestToOriginPointOnEdge = ClosestPointOnSegment(new Vec2(0, 0), closestEdgeToOrigin[0].coord, closestEdgeToOrigin[1].coord);
 
         let penetrationCoordA : Vec2 = null;
         let penetrationCoordB : Vec2 = null;
@@ -209,25 +209,73 @@ module GJKTutorial
             }
         }
     }
+
     ///////////////////////////////////////////////////////////////EPA Part///////////////////////////////////////////////////////////
 
 
-    
-    ///////////////////////////////////////////////////////////////GJK Raycast Part///////////////////////////////////////////////////
+
+
+    ///////////////////////////////////////////////////////////////Raycast Part///////////////////////////////////////////////////////////
     export class GJKRaycastStepResult
     {
-        public lamda : number = 0;    //current length of the ray
-        public supportDir : Vec2 = new Vec2();
+        public contextB : Convex;
+        public minLength : number = 0;
         public simplex : Simplex = new Simplex();
+        public degenerated_0_Simplex : SimplexVertex;   //the start point for next step
+        public currentAnimLength : number = 0;
     }
 
-    export function GJKRaycast(convexA : Convex, convexB : Convex, ray : Raycast, lastStep? : GJKRaycastStepResult) : GJKRaycastStepResult
+
+
+
+    
+    //this is only for step by step demonstration, it's not the optimized algorithm
+    //ray is the movement of convexB
+    //the simplex in returned result value will include only 1 vertex which is closest to origin.
+    export function GJKRaycastStep(convexA : Convex, convexB : Convex, ray : Raycast, lastStepResult? : GJKRaycastStepResult) : GJKRaycastStepResult
     {
-        if(!lastStep)
+        let result : GJKRaycastStepResult = new GJKRaycastStepResult();
+        if(!lastStepResult)
         {
-            //it's first step
+            //it's the first time
+            result.minLength = 0;
+            let initSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
+            let initSupportDiff = SupportDifference(convexA, convexB, initSupportDir);
+            result.simplex.AddVertex(new SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA, initSupportDiff.vertexB));
+            result.degenerated_0_Simplex = result.simplex.GetVertices()[0];
+            return result;
         }
-        return null;
+        
+        let lastSupportDiffVertex = lastStepResult.degenerated_0_Simplex;
+        lastStepResult.simplex.AddVertex(lastSupportDiffVertex);
+        let newSupportDiff = SupportDifference(convexA, convexB, lastSupportDiffVertex.coord.Mul(-1));
+        let newSupportDiffVertex = new SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA, newSupportDiff.vertexB);
+        lastStepResult.simplex.AddVertex(newSupportDiffVertex);
+        let dotSupportDiffVertices = (lastSupportDiffVertex.coord.Dot(newSupportDiffVertex.coord));
+        if(dotSupportDiffVertices > 0)
+        {
+            result.minLength += dotSupportDiffVertices / ray.Dir.Dot(lastSupportDiffVertex.coord);
+        }else{
+            result.minLength = lastStepResult.minLength;
+        }
+
+        //calculate degenerate
+        let offset = ray.Dir.Mul(result.minLength);
+        result.simplex.Translate(offset);
+        let mostClosestPoint = ClosestPointOnSegment(new Vec2(0, 0), result.simplex.GetVertices()[0].coord, result.simplex.GetVertices()[1].coord);
+
+        if(mostClosestPoint.Equals(result.simplex.GetVertices()[0].coord))
+        {
+            result.degenerated_0_Simplex = result.simplex.GetVertices()[0];
+        }
+        if(mostClosestPoint.Equals(result.simplex.GetVertices()[1].coord))
+        {
+            result.degenerated_0_Simplex = result.simplex.GetVertices()[1];
+        }else{
+            result.degenerated_0_Simplex = new SimplexVertex(new Vertex(mostClosestPoint, 'unnamed'), null, null);   //a temporary simplex vertex, must not be the final raycast result.
+        }
+        result.simplex.Translate(offset.Mul(-1));
+        return result;
     }
-    ///////////////////////////////////////////////////////////////GJK Raycast Part///////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////Raycast Part///////////////////////////////////////////////////////////
 }

@@ -1,6 +1,19 @@
 var GJKTutorial;
 (function (GJKTutorial) {
-    GJKTutorial.draggingConvexObj = null;
+    let draggingConvexObj = null;
+    let draggingConvexObjDisableCounter = 0;
+    function GetCurrentDraggingConvexObj() {
+        return draggingConvexObj;
+    }
+    GJKTutorial.GetCurrentDraggingConvexObj = GetCurrentDraggingConvexObj;
+    function DisableDraggingConvexObj() {
+        ++draggingConvexObjDisableCounter;
+    }
+    GJKTutorial.DisableDraggingConvexObj = DisableDraggingConvexObj;
+    function EnableDraggingConvexObj() {
+        --draggingConvexObjDisableCounter;
+    }
+    GJKTutorial.EnableDraggingConvexObj = EnableDraggingConvexObj;
     window.onload = function () {
         let canvas = document.getElementById('canvas');
         let framework = new GJKTutorial.Framework(canvas);
@@ -42,6 +55,12 @@ var GJKTutorial;
         let buttonEPAPushOutToggle = document.getElementById("EPAPushOutToggle");
         GJKTutorial.InitShowCase_DrawEPAStep(framework, canvas, buttonEPAStep, buttonEPAUndo, buttonEPAClear, buttonEPAPushOutToggle);
         //////////////////////GJK Step Demonstration////////////////////////////
+        /////////////////////GJK Raycast Demonstration///////////////////////
+        let buttonGJKRaycastStep = document.getElementById("GJKRaycastStep");
+        let buttonGJKRaycastUndo = document.getElementById("GJKRaycastUndoStep");
+        let buttonGJKRaycastClear = document.getElementById("GJKRaycastClear");
+        GJKTutorial.InitShowCase_DrawGJKRaycastStep(framework, canvas, buttonGJKRaycastStep, buttonGJKRaycastUndo, buttonGJKRaycastClear);
+        /////////////////////GJK Raycast Demonstration///////////////////////
         /////////////////////////Drag Convex///////////////////////////////////
         {
             let bDrag = false;
@@ -57,18 +76,18 @@ var GJKTutorial;
                 for (let i = 0; i < framework.GetConvexObjsCount(); ++i) {
                     let candidiateConvex = framework.GetConvex(i);
                     if (candidiateConvex.IsPointInConvex(lastCood)) {
-                        GJKTutorial.draggingConvexObj = candidiateConvex;
+                        draggingConvexObj = candidiateConvex;
                         break;
                     }
                 }
             });
             canvas.addEventListener('mousemove', (evt) => {
-                if (!bDrag || !GJKTutorial.draggingConvexObj) {
+                if (!bDrag || !draggingConvexObj || draggingConvexObjDisableCounter > 0) {
                     return;
                 }
                 let pos = new GJKTutorial.Vec2(evt.offsetX, evt.offsetY);
                 let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
-                GJKTutorial.draggingConvexObj.Translate(coord.Sub(lastCood));
+                draggingConvexObj.Translate(coord.Sub(lastCood));
                 lastCood = coord;
             });
             canvas.addEventListener('mouseup', (evt) => {
@@ -77,7 +96,7 @@ var GJKTutorial;
                 }
                 event.preventDefault();
                 bDrag = false;
-                GJKTutorial.draggingConvexObj = null;
+                draggingConvexObj = null;
             });
         }
         //////////////////////////////////////////////////////////////////////

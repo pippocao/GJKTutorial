@@ -127,7 +127,7 @@ module GJKTutorial
     }
 
 
-    export function NearestPointOnSegment (point : Vec2, segmentP0 : Vec2, segmentP1 : Vec2) : Vec2
+    export function ClosestPointOnSegment (point : Vec2, segmentP0 : Vec2, segmentP1 : Vec2) : Vec2
     {
         let dot0 = segmentP1.Sub(segmentP0).Dot(point.Sub(segmentP0));
         if(dot0 <= 0)

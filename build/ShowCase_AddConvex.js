@@ -83,6 +83,10 @@ var GJKTutorial;
             penddingVertices.pop();
         };
         buttonBeginAdd.onclick = function () {
+            if (framework.GetConvexObjsCount() >= 2) {
+                alert("More than 2 Convex Object is not allowed, please clear the convex objects first");
+                return;
+            }
             buttonCancel.removeAttribute("disabled");
             buttonFinishAdd.removeAttribute("disabled");
             buttonBeginAdd.setAttribute("disabled", "true");

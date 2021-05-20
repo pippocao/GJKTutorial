@@ -1,6 +1,22 @@
 module GJKTutorial
 {
-    export let draggingConvexObj : Convex = null;
+    let draggingConvexObj : Convex = null;
+    let draggingConvexObjDisableCounter : number = 0;
+
+    export function GetCurrentDraggingConvexObj() : Readonly<Convex>
+    {
+        return draggingConvexObj;
+    }
+
+    export function DisableDraggingConvexObj()
+    {
+        ++draggingConvexObjDisableCounter;
+    }
+
+    export function EnableDraggingConvexObj()
+    {
+        --draggingConvexObjDisableCounter;
+    }
     
     window.onload = function()
     {
@@ -59,6 +75,14 @@ module GJKTutorial
         //////////////////////GJK Step Demonstration////////////////////////////
 
 
+        /////////////////////GJK Raycast Demonstration///////////////////////
+        let buttonGJKRaycastStep = document.getElementById("GJKRaycastStep");
+        let buttonGJKRaycastUndo = document.getElementById("GJKRaycastUndoStep");
+        let buttonGJKRaycastClear = document.getElementById("GJKRaycastClear");
+        InitShowCase_DrawGJKRaycastStep(framework, canvas, buttonGJKRaycastStep, buttonGJKRaycastUndo, buttonGJKRaycastClear);
+        /////////////////////GJK Raycast Demonstration///////////////////////
+
+
         /////////////////////////Drag Convex///////////////////////////////////
         {
             let bDrag = false;
@@ -85,7 +109,7 @@ module GJKTutorial
             });
     
             canvas.addEventListener('mousemove', (evt)=>{
-                if(!bDrag || !draggingConvexObj)
+                if(!bDrag || !draggingConvexObj || draggingConvexObjDisableCounter > 0)
                 {
                     return;
                 }

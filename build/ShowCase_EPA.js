@@ -39,9 +39,12 @@ var GJKTutorial;
         framework.AddCustomDrawFunctionAfterDrawConvex(drawEPACustom);
         epaClearBtn.onclick = (evt) => {
             stepStack = [];
+            GJKTutorial.EnableDraggingConvexObj();
         };
         epaUndoBtn.onclick = (evt) => {
-            stepStack.pop();
+            if (stepStack.length > 1) {
+                stepStack.pop();
+            }
         };
         epaStepBtn.onclick = (evt) => {
             let convexAB = framework.GetConvexAB();
@@ -58,6 +61,7 @@ var GJKTutorial;
                 if (!simplexGJKResult) {
                     return;
                 }
+                GJKTutorial.DisableDraggingConvexObj();
                 stepResult = new GJKTutorial.EPAStepResult();
                 stepResult.simplex = simplexGJKResult;
                 //give a next suggested support dir
@@ -83,7 +87,7 @@ var GJKTutorial;
             }
             let pushObj = convexB;
             let pushDir = epaResult.penetrationDepthAtoB;
-            if (GJKTutorial.draggingConvexObj == convexB) {
+            if (GJKTutorial.GetCurrentDraggingConvexObj() == convexB) {
                 pushObj = convexA;
                 pushDir = pushDir.Mul(-1);
             }

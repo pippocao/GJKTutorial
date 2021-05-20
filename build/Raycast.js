@@ -9,11 +9,20 @@ var GJKTutorial;
         get Point() {
             return this._p;
         }
+        set Point(newStartPoint) {
+            this._p = newStartPoint.Clone();
+        }
         get Dir() {
             return this._dir;
         }
+        set Dir(dir) {
+            this._dir = dir.Normalize();
+        }
         get Length() {
             return this._t;
+        }
+        set Length(length) {
+            this._t = length;
         }
     }
     GJKTutorial.Raycast = Raycast;

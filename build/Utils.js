@@ -104,7 +104,7 @@ var GJKTutorial;
         return Math.sqrt(PointDistanceToSegmentSqr(point, segmentP0, segmentP1));
     }
     GJKTutorial.PointDistanceToSegment = PointDistanceToSegment;
-    function NearestPointOnSegment(point, segmentP0, segmentP1) {
+    function ClosestPointOnSegment(point, segmentP0, segmentP1) {
         let dot0 = segmentP1.Sub(segmentP0).Dot(point.Sub(segmentP0));
         if (dot0 <= 0) {
             return segmentP0.Clone();
@@ -118,7 +118,7 @@ var GJKTutorial;
         let result = segmentP0.Add(dir.Mul(dot0 / lengthSqr));
         return result;
     }
-    GJKTutorial.NearestPointOnSegment = NearestPointOnSegment;
+    GJKTutorial.ClosestPointOnSegment = ClosestPointOnSegment;
     //draw a directional arrow
     function drawArrow(context, startPos, endPos, arrowLength, width, color) {
         context.lineWidth = width;

@@ -55,10 +55,14 @@ module GJKTutorial
 
         epaClearBtn.onclick = (evt)=>{
             stepStack = [];
+            EnableDraggingConvexObj();
         };
 
         epaUndoBtn.onclick = (evt)=>{
-            stepStack.pop();
+            if(stepStack.length > 1)
+            {
+                stepStack.pop();
+            }
         }
 
 
@@ -81,6 +85,7 @@ module GJKTutorial
                 {
                     return;
                 }
+                DisableDraggingConvexObj();
                 stepResult = new EPAStepResult();
                 stepResult.simplex = simplexGJKResult;
                 //give a next suggested support dir
@@ -111,7 +116,7 @@ module GJKTutorial
             }
             let pushObj = convexB;
             let pushDir = epaResult.penetrationDepthAtoB;
-            if(draggingConvexObj == convexB)
+            if(GetCurrentDraggingConvexObj() == convexB)
             {
                 pushObj = convexA;
                 pushDir = pushDir.Mul(-1);

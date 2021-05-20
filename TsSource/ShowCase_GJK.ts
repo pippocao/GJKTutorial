@@ -93,17 +93,21 @@ module GJKTutorial
 
         gjkClearBtn.onclick = (evt)=>{
             stepStack = [];
+            EnableDraggingConvexObj();
         };
 
         gjkUndoBtn.onclick = (evt)=>{
-            let undoStep = stepStack.pop();
-            if(undoStep)
+            if(stepStack.length > 1)
             {
-                currentSupportDir = undoStep.supportDir;
-                currentSupportDirStartCoord = undoStep['supportDirStart'];
-                if(!currentSupportDirStartCoord)
+                let undoStep = stepStack.pop();
+                if(undoStep)
                 {
-                    currentSupportDirStartCoord = new Vec2(0, 0);
+                    currentSupportDir = undoStep.supportDir;
+                    currentSupportDirStartCoord = undoStep['supportDirStart'];
+                    if(!currentSupportDirStartCoord)
+                    {
+                        currentSupportDirStartCoord = new Vec2(0, 0);
+                    }
                 }
             }
         }
@@ -121,6 +125,7 @@ module GJKTutorial
             let lastStepResult = stepStack.length > 0 ? stepStack[stepStack.length - 1] : null;
             if(!lastStepResult)
             {
+                DisableDraggingConvexObj();
                 //it's the first step, we specify the dir from convexB to convexA as the support dir
                 currentSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
             }

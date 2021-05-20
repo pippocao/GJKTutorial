@@ -4,6 +4,7 @@
     <title>Canvas demo</title>
     <script src="build/Utils.js"></script>
     <script src="build/Vec2.js"></script>
+    <script src="build/Raycast.js"></script>
     <script src="build/Vertex.js"></script>
     <script src="build/Coordinate.js"></script>
     <script src="build/Convex.js"></script>
@@ -15,6 +16,7 @@
     <script src="build/ShowCase_EPA.js"></script>
     <script src="build/ShowCase_AddConvex.js"></script>
     <script src="build/ShowCase_MinkowskiDiff.js"></script>
+    <script src="build/ShowCase_GJKRaycast.js"></script>
     <script src="build/main.js"></script>
 </head>
 
@@ -48,6 +50,13 @@
             <button id="EPAClear">EPA Clear</button>
             <br/>
             <button id="EPAPushOutToggle">EPA Push Out Toggle</button>
+
+            <br/>
+            <br/>
+            <button id="GJKRaycastStep">Raycast Step</button>
+            <button id="GJKRaycastUndoStep">Raycast Undo</button>
+            <br/>
+            <button id="GJKRaycastClear">Raycast Clear</button>
         </div>
         <div id="informations" style="float: left;">
             <h4>How to add Convex:</h4>
