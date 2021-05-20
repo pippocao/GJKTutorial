@@ -200,10 +200,10 @@ var GJKTutorial;
             result.minLength += dotSupportDiffVertices / ray.Dir.Dot(lastSupportDiffVertex.coord);
         }
         else {
-            result.minLength = lastStepResult.minLength;
+            result.minLength = 0;
         }
         //calculate degenerate
-        let offset = ray.Dir.Mul(result.minLength);
+        let offset = ray.Dir.Mul(-result.minLength);
         result.simplex.Translate(offset);
         let mostClosestPoint = GJKTutorial.ClosestPointOnSegment(new GJKTutorial.Vec2(0, 0), result.simplex.GetVertices()[0].coord, result.simplex.GetVertices()[1].coord);
         if (mostClosestPoint.Equals(result.simplex.GetVertices()[0].coord)) {

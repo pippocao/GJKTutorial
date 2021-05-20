@@ -49,18 +49,34 @@ var GJKTutorial;
                 context.stroke();
                 context.fill();
                 context.closePath();
+                let supportDirStartCoord = null;
+                let supportDirEndPos = coord.GetCanvasPosByCoord(new GJKTutorial.Vec2());
+                ;
                 if (status == showStepStatus.AfterAnim) {
                     //show next support dir and degenerated point
-                    let supportDirStartPos = coord.GetCanvasPosByCoord(lastStep.degenerated_0_Simplex.coord);
-                    let supportDirEndPos = coord.GetCanvasPosByCoord(lastStep.degenerated_0_Simplex.coord.Add(lastStep.degenerated_0_Simplex.coord.Mul(-1).Normalize().Mul(3)));
-                    GJKTutorial.drawArrow(context, supportDirStartPos, supportDirEndPos, 10, 2, 'green');
+                    supportDirStartCoord = lastStep.degenerated_0_Simplex.coord;
+                    supportDirEndPos = coord.GetCanvasPosByCoord(new GJKTutorial.Vec2());
                 }
                 else {
                     //show current support dir
-                    let supportDirStartPos = coord.GetCanvasPosByCoord(lastStep.simplex.GetVertices()[0].coord);
-                    let supportDirEndPos = coord.GetCanvasPosByCoord(lastStep.simplex.GetVertices()[0].coord.Add(lastStep.degenerated_0_Simplex.coord.Mul(-1).Normalize().Mul(3)));
-                    GJKTutorial.drawArrow(context, supportDirStartPos, supportDirEndPos, 10, 2, 'green');
+                    supportDirStartCoord = lastStep.simplex.GetVertices()[0].coord;
+                    supportDirEndPos = coord.GetCanvasPosByCoord(new GJKTutorial.Vec2());
                 }
+                GJKTutorial.drawArrow(context, coord.GetCanvasPosByCoord(supportDirStartCoord), supportDirEndPos, 10, 2, 'green');
+                let suportDirAxisDir = new GJKTutorial.Vec2(-supportDirStartCoord.y, supportDirStartCoord.x);
+                let axisStartCoord = suportDirAxisDir.Normalize().Mul(10);
+                let axisEndCoord = suportDirAxisDir.Normalize().Mul(-10);
+                let axisStartPoint = coord.GetCanvasPosByCoord(axisStartCoord);
+                let axisEndPoint = coord.GetCanvasPosByCoord(axisEndCoord);
+                context.setLineDash([3, 3]);
+                context.lineWidth = 2.5;
+                context.strokeStyle = '#22ef22aa';
+                context.moveTo(axisStartPoint.x, axisStartPoint.y);
+                context.lineTo(axisStartPoint.x, axisStartPoint.y);
+                context.beginPath();
+                context.lineTo(axisEndPoint.x, axisEndPoint.y);
+                context.stroke();
+                context.closePath();
             }
             //draw Raycast 
             let startPoint = convexAB.B.GetCenterCoord();
@@ -143,7 +159,7 @@ var GJKTutorial;
         };
         undoBtn.onclick = (evt) => {
             stepStack.pop();
-            status = showStepStatus.BeforeAnim;
+            status = stepStack.length > 0 ? showStepStatus.BeforeAnim : showStepStatus.None;
         };
         stepBtn.onclick = (evt) => {
             let convexAB = framework.GetConvexAB();
