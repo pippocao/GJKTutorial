@@ -2,30 +2,30 @@ module GJKTutorial
 {
     export class Raycast
     {
-        public p : Vec2;              //startPoint
-        public dirNormalized : Vec2;  //direction
-        public t : number;            //length
+        public _p : Vec2;   //start point
+        public _dir : Vec2;  //normalized dir
+        public _t : number; //raycast length;
 
-        constructor(startPoint : Vec2, dir : Vec2, length : number)
+        constructor(point : Vec2, dir : Vec2, length:number)
         {
-            this.p = startPoint;
-            this.dirNormalized = dir.Normalize();
-            this.t = length;
+            this._p = point.Clone();
+            this._dir = dir.Normalize();
+            this._t = length;
         }
 
-        public get P() : Readonly<Vec2>
+        public get Point() : Readonly<Vec2>
         {
-            return this.p;
+            return this._p;
         }
 
         public get Dir() : Readonly<Vec2>
         {
-            return this.dirNormalized;
+            return this._dir;
         }
 
-        public get length() : number
+        public get Length() : number
         {
-            return this.t;
+            return this._t;
         }
     }
 }

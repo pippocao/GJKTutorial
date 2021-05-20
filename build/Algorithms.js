@@ -167,5 +167,22 @@ var GJKTutorial;
     }
     GJKTutorial.EAPTest = EAPTest;
     ///////////////////////////////////////////////////////////////EPA Part///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////GJK Raycast Part///////////////////////////////////////////////////
+    class GJKRaycastStepResult {
+        constructor() {
+            this.lamda = 0; //current length of the ray
+            this.supportDir = new GJKTutorial.Vec2();
+            this.simplex = new GJKTutorial.Simplex();
+        }
+    }
+    GJKTutorial.GJKRaycastStepResult = GJKRaycastStepResult;
+    function GJKRaycast(convexA, convexB, ray, lastStep) {
+        if (!lastStep) {
+            //it's first step
+        }
+        return null;
+    }
+    GJKTutorial.GJKRaycast = GJKRaycast;
+    ///////////////////////////////////////////////////////////////GJK Raycast Part///////////////////////////////////////////////////
 })(GJKTutorial || (GJKTutorial = {}));
 //# sourceMappingURL=Algorithms.js.map
