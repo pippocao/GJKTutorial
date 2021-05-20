@@ -153,7 +153,7 @@ module GJKTutorial
             distance = lastStep.currentAnimLength - lastDistance;
             //this may not be such accurate, and brings accumulated inaccuracy
             let offset = ray.Dir.Mul(distance);
-            lastStep.simplex.Translate(offset);
+            lastStep.simplex.Translate(offset.Mul(-1));
             convexAB.B.Translate(offset);
         }
 
@@ -227,7 +227,7 @@ module GJKTutorial
                 {
                     let offset = ray.Dir.Mul(leftDistance);
                     convexB.Translate(offset);
-                    lastStep.simplex.Translate(offset);
+                    lastStep.simplex.Translate(offset.Mul(-1));
                 }
                 status = showStepStatus.AfterAnim;
             }

@@ -127,7 +127,7 @@ var GJKTutorial;
             distance = lastStep.currentAnimLength - lastDistance;
             //this may not be such accurate, and brings accumulated inaccuracy
             let offset = ray.Dir.Mul(distance);
-            lastStep.simplex.Translate(offset);
+            lastStep.simplex.Translate(offset.Mul(-1));
             convexAB.B.Translate(offset);
         };
         clearBtn.onclick = (evt) => {
@@ -189,7 +189,7 @@ var GJKTutorial;
                 if (leftDistance > 0) {
                     let offset = ray.Dir.Mul(leftDistance);
                     convexB.Translate(offset);
-                    lastStep.simplex.Translate(offset);
+                    lastStep.simplex.Translate(offset.Mul(-1));
                 }
                 status = showStepStatus.AfterAnim;
             }

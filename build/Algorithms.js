@@ -191,10 +191,10 @@ var GJKTutorial;
             return result;
         }
         let lastSupportDiffVertex = lastStepResult.degenerated_0_Simplex;
-        lastStepResult.simplex.AddVertex(lastSupportDiffVertex);
+        result.simplex.AddVertex(lastSupportDiffVertex);
         let newSupportDiff = SupportDifference(convexA, convexB, lastSupportDiffVertex.coord.Mul(-1));
         let newSupportDiffVertex = new GJKTutorial.SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA, newSupportDiff.vertexB);
-        lastStepResult.simplex.AddVertex(newSupportDiffVertex);
+        result.simplex.AddVertex(newSupportDiffVertex);
         let dotSupportDiffVertices = (lastSupportDiffVertex.coord.Dot(newSupportDiffVertex.coord));
         if (dotSupportDiffVertices > 0) {
             result.minLength += dotSupportDiffVertices / ray.Dir.Dot(lastSupportDiffVertex.coord);
