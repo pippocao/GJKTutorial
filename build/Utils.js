@@ -119,6 +119,13 @@ var GJKTutorial;
         return result;
     }
     GJKTutorial.ClosestPointOnSegment = ClosestPointOnSegment;
+    function Lerp01(point0, point1, lerpValue) {
+        let diff = point1.Sub(point0);
+        let mag = diff.magnitude;
+        let normalize = diff.Div(mag);
+        return point0.Add(normalize.Mul(mag * lerpValue));
+    }
+    GJKTutorial.Lerp01 = Lerp01;
     //draw a directional arrow
     function drawArrow(context, startPos, endPos, arrowLength, width, color) {
         context.lineWidth = width;

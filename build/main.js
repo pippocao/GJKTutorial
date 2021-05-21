@@ -59,7 +59,8 @@ var GJKTutorial;
         let buttonGJKRaycastStep = document.getElementById("GJKRaycastStep");
         let buttonGJKRaycastUndo = document.getElementById("GJKRaycastUndoStep");
         let buttonGJKRaycastClear = document.getElementById("GJKRaycastClear");
-        GJKTutorial.InitShowCase_DrawGJKRaycastStep(framework, canvas, buttonGJKRaycastStep, buttonGJKRaycastUndo, buttonGJKRaycastClear);
+        let buttonGJKRaycastRuntime = document.getElementById("GJKRaycastRuntime");
+        GJKTutorial.InitShowCase_DrawGJKRaycastStep(framework, canvas, buttonGJKRaycastStep, buttonGJKRaycastUndo, buttonGJKRaycastClear, buttonGJKRaycastRuntime);
         /////////////////////GJK Raycast Demonstration///////////////////////
         /////////////////////////Drag Convex///////////////////////////////////
         {

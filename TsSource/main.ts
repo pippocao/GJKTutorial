@@ -79,7 +79,8 @@ module GJKTutorial
         let buttonGJKRaycastStep = document.getElementById("GJKRaycastStep");
         let buttonGJKRaycastUndo = document.getElementById("GJKRaycastUndoStep");
         let buttonGJKRaycastClear = document.getElementById("GJKRaycastClear");
-        InitShowCase_DrawGJKRaycastStep(framework, canvas, buttonGJKRaycastStep, buttonGJKRaycastUndo, buttonGJKRaycastClear);
+        let buttonGJKRaycastRuntime = document.getElementById("GJKRaycastRuntime");
+        InitShowCase_DrawGJKRaycastStep(framework, canvas, buttonGJKRaycastStep, buttonGJKRaycastUndo, buttonGJKRaycastClear, buttonGJKRaycastRuntime);
         /////////////////////GJK Raycast Demonstration///////////////////////
 
 

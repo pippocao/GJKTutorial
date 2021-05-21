@@ -177,6 +177,9 @@ var GJKTutorial;
         }
     }
     GJKTutorial.GJKRaycastStepResult = GJKRaycastStepResult;
+    class GJKRaycastHitResult {
+    }
+    GJKTutorial.GJKRaycastHitResult = GJKRaycastHitResult;
     //this is only for step by step demonstration, it's not the optimized algorithm
     //ray is the movement of convexB
     //the simplex in returned result value will include only 1 vertex which is closest to origin.
@@ -226,6 +229,79 @@ var GJKTutorial;
         return result;
     }
     GJKTutorial.GJKRaycastStep = GJKRaycastStep;
+    //full GJK Raycast , return null if raycast test failed.
+    function GJKRaycast(convexA, convexB, ray) {
+        let lumda = 0;
+        let initSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
+        let initSupportDiff = SupportDifference(convexA, convexB, initSupportDir);
+        let simplex = new GJKTutorial.Simplex();
+        simplex.AddVertex(new GJKTutorial.SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA, initSupportDiff.vertexB));
+        let closestPointToOrigin = simplex.GetVertices()[0].coord;
+        let supportDir = simplex.GetVertices()[0].coord.Mul(-1);
+        while (true) {
+            let newSupportDiff = SupportDifference(convexA, convexB, supportDir);
+            newSupportDiff.diff.coord = newSupportDiff.diff.coord.Sub(ray.Dir.Mul(lumda));
+            let newSupportDiffVertex = new GJKTutorial.SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA, newSupportDiff.vertexB);
+            let dotSupportDiffVertices = (closestPointToOrigin.Dot(newSupportDiffVertex.coord));
+            if (dotSupportDiffVertices > 0) {
+                let needMoveDistance = dotSupportDiffVertices / ray.Dir.Dot(closestPointToOrigin);
+                if (needMoveDistance < 0) {
+                    return null;
+                }
+                let newLumda = lumda + needMoveDistance;
+                if (lumda > ray.Length) {
+                    return null;
+                }
+                let offsetDistance = newLumda - lumda;
+                lumda = newLumda;
+                simplex.AddVertex(newSupportDiffVertex);
+                simplex.Translate(ray.Dir.Mul(-offsetDistance));
+            }
+            else {
+                simplex.AddVertex(newSupportDiffVertex);
+            }
+            //calculate degenerate
+            let mostClosestEdge = simplex.GetClosestEdgeToOrigin();
+            closestPointToOrigin = GJKTutorial.ClosestPointOnSegment(new GJKTutorial.Vec2(0, 0), simplex.GetVertices()[0].coord, simplex.GetVertices()[1].coord);
+            if (closestPointToOrigin.Equals(mostClosestEdge[0].coord)) {
+                simplex.SetVertices([mostClosestEdge[0]]);
+            }
+            if (closestPointToOrigin.Equals(mostClosestEdge[1].coord)) {
+                simplex.SetVertices([mostClosestEdge[1]]);
+            }
+            else {
+                simplex.SetVertices([mostClosestEdge[0], mostClosestEdge[1]]);
+            }
+            supportDir = closestPointToOrigin.Mul(-1);
+            if (closestPointToOrigin.magnitudeSqr < Number.EPSILON) {
+                let result = new GJKRaycastHitResult();
+                result.distance = lumda;
+                if (simplex.GetVertices().length == 1) {
+                    result.pointA = simplex.GetVertices()[0].GetConvexVerticeA().coord;
+                    result.pointB = simplex.GetVertices()[0].GetConvexVerticeB().coord;
+                    result.normalA = ray.Dir.Mul(-1);
+                    result.normalB = ray.Dir.Clone();
+                }
+                else {
+                    let ratioTo0 = closestPointToOrigin.Sub(simplex.GetVertices()[0].coord).magnitude / simplex.GetVertices()[1].coord.Sub(simplex.GetVertices()[0].coord).magnitude;
+                    result.pointA = GJKTutorial.Lerp01(simplex.GetVertices()[0].GetConvexVerticeA().coord, simplex.GetVertices()[1].GetConvexVerticeA().coord, ratioTo0);
+                    result.pointB = GJKTutorial.Lerp01(simplex.GetVertices()[0].GetConvexVerticeB().coord, simplex.GetVertices()[1].GetConvexVerticeB().coord, ratioTo0);
+                    let normal = simplex.GetVertices()[0].coord.Sub(simplex.GetVertices()[1].coord);
+                    normal = new GJKTutorial.Vec2(-normal.y, normal.x);
+                    if (normal.Dot(ray.Dir) > 0) {
+                        result.normalB = normal;
+                        result.normalA = normal.Mul(-1);
+                    }
+                    else {
+                        result.normalB = normal.Mul(-1);
+                        result.normalA = normal;
+                    }
+                }
+                return result;
+            }
+        }
+    }
+    GJKTutorial.GJKRaycast = GJKRaycast;
     ///////////////////////////////////////////////////////////////Raycast Part///////////////////////////////////////////////////////////
 })(GJKTutorial || (GJKTutorial = {}));
 //# sourceMappingURL=Algorithms.js.map

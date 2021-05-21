@@ -145,6 +145,14 @@ module GJKTutorial
         return result;
     }
 
+    export function Lerp01(point0 : Vec2, point1 : Vec2, lerpValue : number)
+    {
+        let diff = point1.Sub(point0);
+        let mag = diff.magnitude;
+        let normalize = diff.Div(mag);
+        return point0.Add(normalize.Mul(mag * lerpValue));
+    }
+
 
     //draw a directional arrow
     export function drawArrow(context : CanvasRenderingContext2D, startPos : Vec2, endPos : Vec2, arrowLength : number, width : number, color : string)

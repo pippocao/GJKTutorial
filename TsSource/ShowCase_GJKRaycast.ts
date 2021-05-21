@@ -9,7 +9,7 @@ module GJKTutorial
         AfterAnim
     };
 
-    export function InitShowCase_DrawGJKRaycastStep(framework : Framework, canvas:HTMLCanvasElement, stepBtn:HTMLElement, undoBtn:HTMLElement, clearBtn:HTMLElement) : void
+    export function InitShowCase_DrawGJKRaycastStep(framework : Framework, canvas:HTMLCanvasElement, stepBtn:HTMLElement, undoBtn:HTMLElement, clearBtn:HTMLElement, runtimeBtn : HTMLElement) : void
     {
         let stepStack : GJKRaycastStepResult[] = [];
         let ray:Raycast = null;
@@ -17,7 +17,7 @@ module GJKTutorial
         let status = showStepStatus.None;
 
         //Draw
-        let drawGJKCustom = function(deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D) : void
+        let drawGJKStepCustom = function(deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D) : void
         {
             if(ray == null)
             {
@@ -99,7 +99,55 @@ module GJKTutorial
             let rayEndPos = coord.GetCanvasPosByCoord(startPoint.Add(ray.Dir.Mul(ray.Length)));
             drawArrow(context, rayStartPos, rayEndPos, 20, 4, 'red');
         }
-        framework.AddCustomDrawFunctionAfterDrawConvex(drawGJKCustom);
+
+        let drawGJKRuntimeCustom = function(deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D) : void
+        {
+            if(ray == null)
+            {
+                return;
+            }
+            let convexAB = framework.GetConvexAB();
+            if(!convexAB)
+            {
+                return;
+            }
+
+            let runtimeHit = GJKRaycast(convexAB.A, convexAB.B, ray);
+            let distance = runtimeHit ? runtimeHit.distance : ray.Length;
+            let moveVector = ray.Dir.Mul(distance);
+
+            //draw Target ConvexB
+            let startPos = coord.GetCanvasPosByCoord(convexAB.B.GetVertices()[0].coord.Add(moveVector));
+            context.lineWidth = 1;
+            context.setLineDash([4, 4]);
+            context.strokeStyle = '#444444aa';
+            context.fillStyle = '#66444444';
+            context.moveTo(startPos.x, startPos.y);
+            context.beginPath();
+            for(let i = 0; i < convexAB.B.GetVertices().length; ++i)
+            {
+                let pos = coord.GetCanvasPosByCoord(convexAB.B.GetVertices()[i].coord.Add(moveVector));
+                context.lineTo(pos.x, pos.y);
+            }
+            context.stroke();
+            context.fill();
+            context.closePath();
+            context.setLineDash([]);
+
+            //draw Normal
+            if(runtimeHit)
+            {
+                let normalStartPoint = runtimeHit.pointA;
+                let normalEndPos = runtimeHit.normalA.Add(normalStartPoint);
+                drawArrow(context, coord.GetCanvasPosByCoord(normalStartPoint), coord.GetCanvasPosByCoord(normalEndPos), 6, 2, 'red');
+            }
+
+            //draw Raycast 
+            let startPoint = convexAB.B.GetCenterCoord();
+            let rayStartPos = coord.GetCanvasPosByCoord(startPoint);
+            let rayEndPos = coord.GetCanvasPosByCoord(startPoint.Add(ray.Dir.Mul(ray.Length)));
+            drawArrow(context, rayStartPos, rayEndPos, 20, 4, 'red');
+        }
 
 
         let bMouseDown = false;
@@ -178,7 +226,8 @@ module GJKTutorial
 
         
 
-        clearBtn.onclick = (evt)=>{
+        let stepClear = function(evt)
+        {
             stepStack = [];
             ray = null;
             canvas.removeEventListener('mousedown', mouseDownFunc);
@@ -188,15 +237,17 @@ module GJKTutorial
             animUpdateIntervalHandle = -1;
             EnableDraggingConvexObj();
             status = showStepStatus.None;
-        };
+            framework.RmvCustomDrawFunctionAfterDrawConvex(drawGJKStepCustom);
+        }
 
-        undoBtn.onclick = (evt)=>{
+        let stepUndo = function(evt)
+        {
             stepStack.pop();
             status = stepStack.length > 0 ? showStepStatus.BeforeAnim : showStepStatus.None;
         }
 
-
-        stepBtn.onclick = (evt)=>{
+        let stepStart = function(evt)
+        {
             let convexAB = framework.GetConvexAB();
             if(!convexAB)
             {
@@ -206,12 +257,14 @@ module GJKTutorial
             let convexA = convexAB.A;
             let convexB = convexAB.B;
 
+            runtimeEnd(null);
             if(null == ray)
             {
                 DisableDraggingConvexObj();
                 status = showStepStatus.None;
                 //step 1. configure the ray direction
                 ray = new Raycast(convexB.GetCenterCoord(), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()).magnitude);
+                framework.AddCustomDrawFunctionAfterDrawConvex(drawGJKStepCustom);
                 canvas.addEventListener('mousedown', mouseDownFunc);
                 canvas.addEventListener('mouseup', mouseUpFunc);
                 canvas.addEventListener('mousemove', mouseMoveFunc);
@@ -252,6 +305,58 @@ module GJKTutorial
             }else if(status == showStepStatus.AnimEnd)
             {
                 status = showStepStatus.AfterAnim;
+            }
+        }
+
+
+        let runtimeRunning = false;
+        let runtimeStart = function(evt)
+        {
+            let convexAB = framework.GetConvexAB();
+            if(!convexAB)
+            {
+                alert("You must have 2 convex objects to do the test")
+                return null;
+            }
+            let convexA = convexAB.A;
+            let convexB = convexAB.B;
+            if(runtimeRunning)
+            {
+                return;
+            }
+            runtimeRunning = true;
+            stepClear(null);
+            ray = new Raycast(convexB.GetCenterCoord(), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()).magnitude);
+            framework.AddCustomDrawFunctionAfterDrawConvex(drawGJKRuntimeCustom);
+            canvas.addEventListener('mousedown', mouseDownFunc);
+            canvas.addEventListener('mouseup', mouseUpFunc);
+            canvas.addEventListener('mousemove', mouseMoveFunc);
+        }
+
+        let runtimeEnd = function(evt)
+        {
+            if(!runtimeRunning)
+            {
+                return;
+            }
+            runtimeRunning = false;
+            framework.RmvCustomDrawFunctionAfterDrawConvex(drawGJKRuntimeCustom);
+            canvas.removeEventListener('mousedown', mouseDownFunc);
+            canvas.removeEventListener('mouseup', mouseUpFunc);
+            canvas.removeEventListener('mousemove', mouseMoveFunc);
+        }
+
+
+        clearBtn.onclick = stepClear;
+        undoBtn.onclick = stepUndo;
+        stepBtn.onclick = stepStart;
+
+        runtimeBtn.onclick = (evt)=>{
+            if(runtimeRunning)
+            {
+                runtimeEnd(evt);
+            }else{
+                runtimeStart(evt);
             }
         }
     }
