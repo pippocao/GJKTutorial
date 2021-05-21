@@ -230,6 +230,7 @@ var GJKTutorial;
     }
     GJKTutorial.GJKRaycastStep = GJKRaycastStep;
     //full GJK Raycast , return null if raycast test failed.
+    //IMPORTANT : Do not test 2 intersected convex, or dead loop will happen!!!
     function GJKRaycast(convexA, convexB, ray) {
         let lumda = 0;
         let initSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());

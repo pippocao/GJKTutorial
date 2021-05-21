@@ -299,6 +299,7 @@ module GJKTutorial
     }
 
     //full GJK Raycast , return null if raycast test failed.
+    //IMPORTANT : Do not test 2 intersected convex, or dead loop will happen!!!
     export function GJKRaycast(convexA : Convex, convexB : Convex, ray : Raycast) : GJKRaycastHitResult
     {
         let lumda = 0;
