@@ -221,7 +221,9 @@ module GJKTutorial
         public contextB : Convex;
         public minLength : number = 0;
         public simplex : Simplex = new Simplex();
-        public degenerated_0_Simplex : SimplexVertex;   //the start point for next step
+        public degeneratedSimplex : Simplex = new Simplex();  //for next step
+        public closestPointToOriginAfterMoving : Vec2;   //the start point for next step
+        public supportDir : Vec2;
         public currentAnimLength : number = 0;
     }
 
@@ -242,19 +244,23 @@ module GJKTutorial
             let initSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
             let initSupportDiff = SupportDifference(convexA, convexB, initSupportDir);
             result.simplex.AddVertex(new SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA, initSupportDiff.vertexB));
-            result.degenerated_0_Simplex = result.simplex.GetVertices()[0];
+            result.closestPointToOriginAfterMoving = result.simplex.GetVertices()[0].coord;
+            result.degeneratedSimplex = new Simplex();
+            result.degeneratedSimplex.SetVertices(result.simplex.GetVertices());
+            result.supportDir = result.simplex.GetVertices()[0].coord.Mul(-1);
             return result;
         }
         
-        let lastSupportDiffVertex = lastStepResult.degenerated_0_Simplex;
-        result.simplex.AddVertex(lastSupportDiffVertex);
-        let newSupportDiff = SupportDifference(convexA, convexB, lastSupportDiffVertex.coord.Mul(-1));
+        let closestPointToOrigin = lastStepResult.closestPointToOriginAfterMoving;
+        result.simplex.SetVertices(lastStepResult.degeneratedSimplex.GetVertices());
+        result.supportDir = closestPointToOrigin.Mul(-1);
+        let newSupportDiff = SupportDifference(convexA, convexB, result.supportDir);
         let newSupportDiffVertex = new SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA, newSupportDiff.vertexB);
         result.simplex.AddVertex(newSupportDiffVertex);
-        let dotSupportDiffVertices = (lastSupportDiffVertex.coord.Dot(newSupportDiffVertex.coord));
+        let dotSupportDiffVertices = (closestPointToOrigin.Dot(newSupportDiffVertex.coord));
         if(dotSupportDiffVertices > 0)
         {
-            result.minLength += dotSupportDiffVertices / ray.Dir.Dot(lastSupportDiffVertex.coord);
+            result.minLength += dotSupportDiffVertices / ray.Dir.Dot(closestPointToOrigin);
         }else{
             result.minLength = 0;
         }
@@ -262,17 +268,21 @@ module GJKTutorial
         //calculate degenerate
         let offset = ray.Dir.Mul(-result.minLength);
         result.simplex.Translate(offset);
-        let mostClosestPoint = ClosestPointOnSegment(new Vec2(0, 0), result.simplex.GetVertices()[0].coord, result.simplex.GetVertices()[1].coord);
 
-        if(mostClosestPoint.Equals(result.simplex.GetVertices()[0].coord))
+
+        let mostClosestEdge = result.simplex.GetClosestEdgeToOrigin();
+
+        let mostClosestPoint = ClosestPointOnSegment(new Vec2(0, 0), result.simplex.GetVertices()[0].coord, result.simplex.GetVertices()[1].coord);
+        result.closestPointToOriginAfterMoving = mostClosestPoint;
+        if(mostClosestPoint.Equals(mostClosestEdge[0].coord))
         {
-            result.degenerated_0_Simplex = result.simplex.GetVertices()[0];
+            result.degeneratedSimplex.SetVertices([mostClosestEdge[0]]);
         }
-        if(mostClosestPoint.Equals(result.simplex.GetVertices()[1].coord))
+        if(mostClosestPoint.Equals(mostClosestEdge[1].coord))
         {
-            result.degenerated_0_Simplex = result.simplex.GetVertices()[1];
+            result.degeneratedSimplex.SetVertices([mostClosestEdge[1]]);
         }else{
-            result.degenerated_0_Simplex = new SimplexVertex(new Vertex(mostClosestPoint, 'unnamed'), null, null);   //a temporary simplex vertex, must not be the final raycast result.
+            result.degeneratedSimplex.SetVertices([mostClosestEdge[0], mostClosestEdge[1]]);
         }
         result.simplex.Translate(offset.Mul(-1));
         return result;

@@ -5,6 +5,7 @@ module GJKTutorial
         None,
         BeforeAnim,
         Anim,
+        AnimEnd,
         AfterAnim
     };
 
@@ -34,9 +35,10 @@ module GJKTutorial
                 context.strokeStyle = '#ff00ffAA';
                 context.fillStyle = '#ff00ffAA';
                 context.setLineDash([]);
-                for(let i = 0; i < lastStep.simplex.GetVertices().length; ++i)
+                let simplexToDraw = status == showStepStatus.AfterAnim ? lastStep.degeneratedSimplex : lastStep.simplex;
+                for(let i = 0; i < simplexToDraw.GetVertices().length; ++i)
                 {
-                    let ve = lastStep.simplex.GetVertices()[i];
+                    let ve = simplexToDraw.GetVertices()[i];
                     let pos = coord.GetCanvasPosByCoord(ve.coord);
                     context.lineWidth = 0;
                     context.moveTo(pos.x, pos.y);
@@ -46,12 +48,12 @@ module GJKTutorial
                     context.closePath();
                 }
                 context.lineWidth = 5;
-                let startPos = coord.GetCanvasPosByCoord(lastStep.simplex.GetVertices()[0].coord);
+                let startPos = coord.GetCanvasPosByCoord(simplexToDraw.GetVertices()[0].coord);
                 context.moveTo(startPos.x, startPos.y);
                 context.beginPath();
-                for(let i = 0; i < lastStep.simplex.GetVertices().length; ++i)
+                for(let i = 0; i < simplexToDraw.GetVertices().length; ++i)
                 {
-                    let pos = coord.GetCanvasPosByCoord(lastStep.simplex.GetVertices()[i].coord);
+                    let pos = coord.GetCanvasPosByCoord(simplexToDraw.GetVertices()[i].coord);
                     context.lineTo(pos.x, pos.y);
                 }
                 context.stroke();
@@ -59,33 +61,35 @@ module GJKTutorial
                 context.closePath();
 
                 let supportDirStartCoord : Vec2 = null;
-                let supportDirEndPos : Vec2 = coord.GetCanvasPosByCoord(new Vec2());;
+                let supportDirEndCoord : Vec2 = null;
                 if(status == showStepStatus.AfterAnim)
                 {
                     //show next support dir and degenerated point
-                    supportDirStartCoord = lastStep.degenerated_0_Simplex.coord;
-                    supportDirEndPos = coord.GetCanvasPosByCoord(new Vec2());
+                    supportDirStartCoord = lastStep.closestPointToOriginAfterMoving;
+                    supportDirEndCoord = new Vec2();
                 }else{
                     //show current support dir
-                    supportDirStartCoord = lastStep.simplex.GetVertices()[0].coord;
-                    supportDirEndPos = coord.GetCanvasPosByCoord(new Vec2());
+                    supportDirStartCoord = lastStep.simplex.GetVertices()[lastStep.simplex.GetVertices().length - 1].coord;
+                    let suportDirAxisDir = new Vec2(-lastStep.supportDir.y, lastStep.supportDir.x).Normalize();
+                    let Axis0 = suportDirAxisDir.Normalize().Mul(1000);
+                    let Axis1 = suportDirAxisDir.Normalize().Mul(-1000);
+                    supportDirEndCoord = ClosestPointOnSegment(supportDirStartCoord, Axis0, Axis1);
                 }
-                drawArrow(context, coord.GetCanvasPosByCoord(supportDirStartCoord), supportDirEndPos, 10, 2, 'green');
+                drawArrow(context, coord.GetCanvasPosByCoord(supportDirStartCoord), coord.GetCanvasPosByCoord(supportDirEndCoord), 0, 2, 'green');
 
-                let suportDirAxisDir = new Vec2(-supportDirStartCoord.y, supportDirStartCoord.x);
+                let supportDir = supportDirStartCoord.Sub(supportDirEndCoord);
+                let suportDirAxisDir = new Vec2(-supportDir.y, supportDir.x);
                 let axisStartCoord = suportDirAxisDir.Normalize().Mul(10);
                 let axisEndCoord = suportDirAxisDir.Normalize().Mul(-10);
                 let axisStartPoint = coord.GetCanvasPosByCoord(axisStartCoord);
                 let axisEndPoint = coord.GetCanvasPosByCoord(axisEndCoord);
                 context.setLineDash([3, 3]);
-                context.lineWidth = 2.5;
+                context.lineWidth = 2;
                 context.strokeStyle = '#22ef22aa';
                 context.moveTo(axisStartPoint.x, axisStartPoint.y);
                 context.lineTo(axisStartPoint.x, axisStartPoint.y);
-                context.beginPath();
                 context.lineTo(axisEndPoint.x, axisEndPoint.y);
                 context.stroke();
-                context.closePath();
             }
 
 
@@ -163,7 +167,7 @@ module GJKTutorial
             lastStep.currentAnimLength = Math.min(distance + lastStep.currentAnimLength, lastStep.minLength);
             if(lastStep.currentAnimLength == lastStep.minLength)
             {
-                status = showStepStatus.AfterAnim;
+                status = showStepStatus.AnimEnd;
             }
             distance = lastStep.currentAnimLength - lastDistance;
             //this may not be such accurate, and brings accumulated inaccuracy
@@ -244,6 +248,9 @@ module GJKTutorial
                     convexB.Translate(offset);
                     lastStep.simplex.Translate(offset.Mul(-1));
                 }
+                status = showStepStatus.AnimEnd;
+            }else if(status == showStepStatus.AnimEnd)
+            {
                 status = showStepStatus.AfterAnim;
             }
         }

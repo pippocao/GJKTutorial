@@ -172,6 +172,7 @@ var GJKTutorial;
         constructor() {
             this.minLength = 0;
             this.simplex = new GJKTutorial.Simplex();
+            this.degeneratedSimplex = new GJKTutorial.Simplex(); //for next step
             this.currentAnimLength = 0;
         }
     }
@@ -187,17 +188,21 @@ var GJKTutorial;
             let initSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
             let initSupportDiff = SupportDifference(convexA, convexB, initSupportDir);
             result.simplex.AddVertex(new GJKTutorial.SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA, initSupportDiff.vertexB));
-            result.degenerated_0_Simplex = result.simplex.GetVertices()[0];
+            result.closestPointToOriginAfterMoving = result.simplex.GetVertices()[0].coord;
+            result.degeneratedSimplex = new GJKTutorial.Simplex();
+            result.degeneratedSimplex.SetVertices(result.simplex.GetVertices());
+            result.supportDir = result.simplex.GetVertices()[0].coord.Mul(-1);
             return result;
         }
-        let lastSupportDiffVertex = lastStepResult.degenerated_0_Simplex;
-        result.simplex.AddVertex(lastSupportDiffVertex);
-        let newSupportDiff = SupportDifference(convexA, convexB, lastSupportDiffVertex.coord.Mul(-1));
+        let closestPointToOrigin = lastStepResult.closestPointToOriginAfterMoving;
+        result.simplex.SetVertices(lastStepResult.degeneratedSimplex.GetVertices());
+        result.supportDir = closestPointToOrigin.Mul(-1);
+        let newSupportDiff = SupportDifference(convexA, convexB, result.supportDir);
         let newSupportDiffVertex = new GJKTutorial.SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA, newSupportDiff.vertexB);
         result.simplex.AddVertex(newSupportDiffVertex);
-        let dotSupportDiffVertices = (lastSupportDiffVertex.coord.Dot(newSupportDiffVertex.coord));
+        let dotSupportDiffVertices = (closestPointToOrigin.Dot(newSupportDiffVertex.coord));
         if (dotSupportDiffVertices > 0) {
-            result.minLength += dotSupportDiffVertices / ray.Dir.Dot(lastSupportDiffVertex.coord);
+            result.minLength += dotSupportDiffVertices / ray.Dir.Dot(closestPointToOrigin);
         }
         else {
             result.minLength = 0;
@@ -205,15 +210,17 @@ var GJKTutorial;
         //calculate degenerate
         let offset = ray.Dir.Mul(-result.minLength);
         result.simplex.Translate(offset);
+        let mostClosestEdge = result.simplex.GetClosestEdgeToOrigin();
         let mostClosestPoint = GJKTutorial.ClosestPointOnSegment(new GJKTutorial.Vec2(0, 0), result.simplex.GetVertices()[0].coord, result.simplex.GetVertices()[1].coord);
-        if (mostClosestPoint.Equals(result.simplex.GetVertices()[0].coord)) {
-            result.degenerated_0_Simplex = result.simplex.GetVertices()[0];
+        result.closestPointToOriginAfterMoving = mostClosestPoint;
+        if (mostClosestPoint.Equals(mostClosestEdge[0].coord)) {
+            result.degeneratedSimplex.SetVertices([mostClosestEdge[0]]);
         }
-        if (mostClosestPoint.Equals(result.simplex.GetVertices()[1].coord)) {
-            result.degenerated_0_Simplex = result.simplex.GetVertices()[1];
+        if (mostClosestPoint.Equals(mostClosestEdge[1].coord)) {
+            result.degeneratedSimplex.SetVertices([mostClosestEdge[1]]);
         }
         else {
-            result.degenerated_0_Simplex = new GJKTutorial.SimplexVertex(new GJKTutorial.Vertex(mostClosestPoint, 'unnamed'), null, null); //a temporary simplex vertex, must not be the final raycast result.
+            result.degeneratedSimplex.SetVertices([mostClosestEdge[0], mostClosestEdge[1]]);
         }
         result.simplex.Translate(offset.Mul(-1));
         return result;
