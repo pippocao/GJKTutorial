@@ -299,7 +299,6 @@ module GJKTutorial
     }
 
     //full GJK Raycast , return null if raycast test failed.
-    //IMPORTANT : Do not test 2 intersected convex, or dead loop will happen!!!
     export function GJKRaycast(convexA : Convex, convexB : Convex, ray : Raycast) : GJKRaycastHitResult
     {
         let lumda = 0;
@@ -309,6 +308,7 @@ module GJKTutorial
         simplex.AddVertex(new SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA, initSupportDiff.vertexB));
         let closestPointToOrigin = simplex.GetVertices()[0].coord;
         let supportDir = simplex.GetVertices()[0].coord.Mul(-1);
+        let closestDistance = Number.MAX_SAFE_INTEGER;
         while(true)
         {
             let newSupportDiff = SupportDifference(convexA, convexB, supportDir);
@@ -331,6 +331,7 @@ module GJKTutorial
                 lumda = newLumda;
                 simplex.AddVertex(newSupportDiffVertex);
                 simplex.Translate(ray.Dir.Mul(-offsetDistance));
+                closestDistance = Number.MAX_SAFE_INTEGER;
             }else{
                 simplex.AddVertex(newSupportDiffVertex)
             }
@@ -338,7 +339,7 @@ module GJKTutorial
             //calculate degenerate
             let mostClosestEdge = simplex.GetClosestEdgeToOrigin();
 
-            closestPointToOrigin = ClosestPointOnSegment(new Vec2(0, 0), simplex.GetVertices()[0].coord, simplex.GetVertices()[1].coord);
+            closestPointToOrigin = ClosestPointOnSegment(new Vec2(0, 0), mostClosestEdge[0].coord, mostClosestEdge[1].coord);
             if(closestPointToOrigin.Equals(mostClosestEdge[0].coord))
             {
                 simplex.SetVertices([mostClosestEdge[0]]);
@@ -350,6 +351,7 @@ module GJKTutorial
                 simplex.SetVertices([mostClosestEdge[0], mostClosestEdge[1]]);
             }
             supportDir = closestPointToOrigin.Mul(-1);
+            let distance = closestPointToOrigin.magnitudeSqr;
             if(closestPointToOrigin.magnitudeSqr < Number.EPSILON)
             {
                 let result = new GJKRaycastHitResult();
@@ -378,7 +380,19 @@ module GJKTutorial
                     }
                 }
                 return result;
+            }else if(distance >= closestDistance)   //A and B is already collided
+            {
+                //do EPA
+                let epaResult = EAPTest(convexA, convexB);
+                let result = new GJKRaycastHitResult();
+                result.distance = 0;
+                result.pointA = epaResult.penetrationPointOnConvexA;
+                result.pointB = epaResult.penetrationPointOnConvexB;
+                result.normalA = epaResult.penetrationDepthAtoB;
+                result.normalB = epaResult.penetrationDepthAtoB.Mul(-1);
+                return result;
             }
+            closestDistance = distance;
         }
     }
     ///////////////////////////////////////////////////////////////Raycast Part///////////////////////////////////////////////////////////

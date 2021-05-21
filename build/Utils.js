@@ -121,7 +121,11 @@ var GJKTutorial;
     GJKTutorial.ClosestPointOnSegment = ClosestPointOnSegment;
     function Lerp01(point0, point1, lerpValue) {
         let diff = point1.Sub(point0);
-        let mag = diff.magnitude;
+        let magSqr = diff.magnitudeSqr;
+        if (Math.abs(magSqr) < Number.EPSILON) {
+            return point0.Clone();
+        }
+        let mag = Math.sqrt(magSqr);
         let normalize = diff.Div(mag);
         return point0.Add(normalize.Mul(mag * lerpValue));
     }
