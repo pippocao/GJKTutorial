@@ -131,5 +131,20 @@ module GJKTutorial
             });
         }
         //////////////////////////////////////////////////////////////////////
+        /////////////////////Paint Tools///////////////////////
+        InitShowCase_Paint(framework, canvas, 
+            document.getElementById("strokeColors"),
+            document.getElementById("fillColors"),
+            document.getElementById("lineThick"),
+            document.getElementById("lineMedium"),
+            document.getElementById("lineThin"),
+            document.getElementById("SolidLine"),
+            document.getElementById("DashLine"),
+            document.getElementById("drawLine"),
+            document.getElementById("drawCircle"),
+            document.getElementById("drawRectangle"),
+            document.getElementById("drawArrow"),
+            );
+        /////////////////////Paint Tools///////////////////////
     };
 }

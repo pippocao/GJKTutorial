@@ -17,6 +17,7 @@
     <script src="build/ShowCase_AddConvex.js"></script>
     <script src="build/ShowCase_MinkowskiDiff.js"></script>
     <script src="build/ShowCase_GJKRaycast.js"></script>
+    <script src="build/ShowCase_Paint.js"></script>
     <script src="build/main.js"></script>
 </head>
 
@@ -59,6 +60,48 @@
             <button id="GJKRaycastClear">Raycast Clear</button>
             <br/>
             <button id="GJKRaycastRuntime">Raycast Runtime Toggle</button>
+
+
+            <h4>Paint</h4>
+            <div id="strokeColors">
+                <span>stroke color</span>
+                <button id="" style="background-color: red;">  _  </button>
+                <button id="" style="background-color:royalblue;">  _  </button>
+                <button id="" style="background-color:orange;">  _  </button>
+                <button id="" style="background-color:black ">  _  </button>
+                <button id="" style="background-color:green">  _  </button>
+            </div>
+            <div id="fillColors">
+                <span>fill color</span>
+                <button id="" style="background-color:#00000000;">  _  </button>
+                <button id="" style="background-color: red;">  _  </button>
+                <button id="" style="background-color:royalblue;">  _  </button>
+                <button id="" style="background-color:orange;">  _  </button>
+                <button id="" style="background-color:black ">  _  </button>
+                <button id="" style="background-color:green">  _  </button>
+            </div>
+            <br/>
+            <div>
+                <button id="lineThick">Line Width Thick</button>
+                <button id="lineMedium">Line Width Medium</button>
+                <button id="lineThin">Line Width Thin</button>
+            </div>
+
+            
+            <br/>
+            <div>
+            <button id="SolidLine">Solid Line</button>
+                <button id="DashLine">Dash Line</button>
+            </div>
+
+            <br/>
+            <div>
+            <button id="drawLine">Draw Line</button>
+                <button id="drawCircle">Draw Circle</button>
+                <button id="drawRectangle">Draw Rectangle</button>
+                <button id="drawArrow">Draw Arrow</button>
+            </div>
+
         </div>
         <div id="informations" style="float: left;">
             <h4>How to add Convex:</h4>

@@ -57,43 +57,31 @@ module GJKTutorial
 
 
         //Manually configure support dir
-        let bMouseDown = false;
-        canvas.addEventListener('mousedown', (evt)=>{
-            if(evt.button != 0)
-            {
-                return;
-            }
+        let mouseDown = function(evt : MouseEvent)
+        {
             let pos = new Vec2(evt.offsetX, evt.offsetY);
             currentSupportDirStartCoord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
-            bMouseDown = true;
-        });
+        }
 
-        canvas.addEventListener('mouseup', (evt)=>{
-            if(evt.button != 0)
-            {
-                return;
-            }
+        let mouseUp = function(evt : MouseEvent)
+        {
             let pos = new Vec2(evt.offsetX, evt.offsetY);
             let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
             currentSupportDir = coord.Sub(currentSupportDirStartCoord);
-            bMouseDown = false;
-        });
+        }
 
-        
-        canvas.addEventListener('mousemove', (evt)=>{
-            if(evt.button != 0 || !bMouseDown)
-            {
-                return;
-            }
+        let mouseMove = function(evt : MouseEvent)
+        {
             let pos = new Vec2(evt.offsetX, evt.offsetY);
             let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
             currentSupportDir = coord.Sub(currentSupportDirStartCoord);
-        });
+        }
         
 
         gjkClearBtn.onclick = (evt)=>{
             stepStack = [];
             EnableDraggingConvexObj();
+            framework.UnRegisterLeftMouseEvent(mouseDown, mouseMove, mouseUp);
         };
 
         gjkUndoBtn.onclick = (evt)=>{
@@ -126,6 +114,7 @@ module GJKTutorial
             if(!lastStepResult)
             {
                 DisableDraggingConvexObj();
+                framework.RegisterLeftMouseEvent(mouseDown, mouseMove, mouseUp);
                 //it's the first step, we specify the dir from convexB to convexA as the support dir
                 currentSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
             }

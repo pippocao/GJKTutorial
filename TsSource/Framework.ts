@@ -10,6 +10,11 @@ module GJKTutorial
         private readonly convexFillColors : string[] = ['#8e232244', '#2387ff44'];
         private customDrawsBeforeDrawConvex : ((deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void) [] = [];
         private customDrawsAfterDrawConvex : ((deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void) [] = [];
+        private customDrawsFinal : ((deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void) [] = [];
+        private leftMouseDown : (evt : MouseEvent)=>void = null;
+        private leftMouseMove : (evt : MouseEvent)=>void = null;
+        private leftMouseUp : (evt : MouseEvent)=>void = null;
+
 
         constructor(inCanvas : HTMLCanvasElement)
         {
@@ -22,6 +27,28 @@ module GJKTutorial
                 this.update(currentTime - lastUpdateTime);
                 lastUpdateTime = currentTime;
             }, 16);
+
+            let isLeftMouseDown = false;
+            this.canvas.addEventListener('mousedown', (evt : MouseEvent)=>{
+                if(this.leftMouseDown && evt.button == 0)
+                {
+                    isLeftMouseDown = true;
+                    this.leftMouseDown(evt);
+                }
+            });
+            this.canvas.addEventListener('mouseup', (evt : MouseEvent)=>{
+                if(this.leftMouseUp && evt.button == 0)
+                {
+                    isLeftMouseDown = false;
+                    this.leftMouseUp(evt);
+                }
+            });
+            this.canvas.addEventListener('mousemove', (evt : MouseEvent)=>{
+                if(this.leftMouseMove && isLeftMouseDown)
+                {
+                    this.leftMouseMove(evt);
+                }
+            });
         }
 
 
@@ -36,6 +63,9 @@ module GJKTutorial
             this.customDrawsAfterDrawConvex.forEach(element => {
                 element(deltaMs, this.coord, this.context);
             });
+            this.customDrawsFinal.forEach(element => {
+                element(deltaMs, this.coord, this.context);
+            });
 
             if(this.convexObjs.length == 2)
             {
@@ -43,6 +73,29 @@ module GJKTutorial
                 {
                     this.context.fillRect(0, 0, 20, 20);
                 }
+            }
+        }
+
+        public RegisterLeftMouseEvent(mouseDown : (evt : MouseEvent)=>void , mouseMove : (evt : MouseEvent)=>void , mouseUp:(evt : MouseEvent)=>void )
+        {
+            this.leftMouseDown = mouseDown;
+            this.leftMouseMove = mouseMove;
+            this.leftMouseUp = mouseUp;
+        }
+
+        public UnRegisterLeftMouseEvent(mouseDown : (evt : MouseEvent)=>void , mouseMove : (evt : MouseEvent)=>void , mouseUp:(evt : MouseEvent)=>void )
+        {
+            if(this.leftMouseDown == mouseDown)
+            {
+                this.leftMouseDown = null;
+            }
+            if(this.leftMouseUp == mouseUp)
+            {
+                this.leftMouseUp = null;
+            }
+            if(this.leftMouseMove == mouseMove)
+            {
+                this.leftMouseMove = null;
             }
         }
 
@@ -71,6 +124,20 @@ module GJKTutorial
             if(index >= 0)
             {
                 this.customDrawsAfterDrawConvex.splice(index, 1);
+            }
+        }
+
+        public AddCustomDrawFunctionFinal(func : (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void)
+        {
+            this.customDrawsFinal.push(func);
+        }
+
+        public RmvCustomDrawFunctionFinal(func : (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>void)
+        {
+            let index = this.customDrawsFinal.indexOf(func);
+            if(index >= 0)
+            {
+                this.customDrawsFinal.splice(index, 1);
             }
         }
 

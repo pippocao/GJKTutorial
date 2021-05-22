@@ -7,6 +7,10 @@ var GJKTutorial;
             this.convexFillColors = ['#8e232244', '#2387ff44'];
             this.customDrawsBeforeDrawConvex = [];
             this.customDrawsAfterDrawConvex = [];
+            this.customDrawsFinal = [];
+            this.leftMouseDown = null;
+            this.leftMouseMove = null;
+            this.leftMouseUp = null;
             this.canvas = inCanvas;
             this.context = this.canvas.getContext("2d");
             this.coord = new GJKTutorial.Coordinate(this.canvas);
@@ -16,6 +20,24 @@ var GJKTutorial;
                 this.update(currentTime - lastUpdateTime);
                 lastUpdateTime = currentTime;
             }, 16);
+            let isLeftMouseDown = false;
+            this.canvas.addEventListener('mousedown', (evt) => {
+                if (this.leftMouseDown && evt.button == 0) {
+                    isLeftMouseDown = true;
+                    this.leftMouseDown(evt);
+                }
+            });
+            this.canvas.addEventListener('mouseup', (evt) => {
+                if (this.leftMouseUp && evt.button == 0) {
+                    isLeftMouseDown = false;
+                    this.leftMouseUp(evt);
+                }
+            });
+            this.canvas.addEventListener('mousemove', (evt) => {
+                if (this.leftMouseMove && isLeftMouseDown) {
+                    this.leftMouseMove(evt);
+                }
+            });
         }
         update(deltaMs) {
             this.ClearCanvas();
@@ -27,10 +49,29 @@ var GJKTutorial;
             this.customDrawsAfterDrawConvex.forEach(element => {
                 element(deltaMs, this.coord, this.context);
             });
+            this.customDrawsFinal.forEach(element => {
+                element(deltaMs, this.coord, this.context);
+            });
             if (this.convexObjs.length == 2) {
                 if (GJKTutorial.GJKTest(this.convexObjs[0], this.convexObjs[1]) != null) {
                     this.context.fillRect(0, 0, 20, 20);
                 }
+            }
+        }
+        RegisterLeftMouseEvent(mouseDown, mouseMove, mouseUp) {
+            this.leftMouseDown = mouseDown;
+            this.leftMouseMove = mouseMove;
+            this.leftMouseUp = mouseUp;
+        }
+        UnRegisterLeftMouseEvent(mouseDown, mouseMove, mouseUp) {
+            if (this.leftMouseDown == mouseDown) {
+                this.leftMouseDown = null;
+            }
+            if (this.leftMouseUp == mouseUp) {
+                this.leftMouseUp = null;
+            }
+            if (this.leftMouseMove == mouseMove) {
+                this.leftMouseMove = null;
             }
         }
         AddCustomDrawFunctionBeforeDrawConvex(func) {
@@ -49,6 +90,15 @@ var GJKTutorial;
             let index = this.customDrawsAfterDrawConvex.indexOf(func);
             if (index >= 0) {
                 this.customDrawsAfterDrawConvex.splice(index, 1);
+            }
+        }
+        AddCustomDrawFunctionFinal(func) {
+            this.customDrawsFinal.push(func);
+        }
+        RmvCustomDrawFunctionFinal(func) {
+            let index = this.customDrawsFinal.indexOf(func);
+            if (index >= 0) {
+                this.customDrawsFinal.splice(index, 1);
             }
         }
         GetCoordinate() {

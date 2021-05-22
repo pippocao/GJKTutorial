@@ -150,12 +150,7 @@ module GJKTutorial
         }
 
 
-        let bMouseDown = false;
         let mouseDownFunc = (evt)=>{
-            if(evt.button != 0)
-            {
-                return;
-            }
             let pos = new Vec2(evt.offsetX, evt.offsetY);
             let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
             let convexAB = framework.GetConvexAB();
@@ -168,13 +163,8 @@ module GJKTutorial
             ray.Point = startP;
             ray.Dir = dir;
             ray.Length = dir.magnitude;
-            bMouseDown = true;
         };
         let mouseMoveFunc = (evt)=>{
-            if(evt.button != 0 || !bMouseDown)
-            {
-                return;
-            }
             let pos = new Vec2(evt.offsetX, evt.offsetY);
             let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
             let convexAB = framework.GetConvexAB();
@@ -194,7 +184,6 @@ module GJKTutorial
             {
                 return;
             }
-            bMouseDown = false;
         };
 
         let AnimUpdate = function(deltaMs : number)
@@ -230,9 +219,7 @@ module GJKTutorial
         {
             stepStack = [];
             ray = null;
-            canvas.removeEventListener('mousedown', mouseDownFunc);
-            canvas.removeEventListener('mouseup', mouseUpFunc);
-            canvas.removeEventListener('mousemove', mouseMoveFunc);
+            framework.UnRegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
             clearInterval(animUpdateIntervalHandle);
             animUpdateIntervalHandle = -1;
             EnableDraggingConvexObj();
@@ -265,9 +252,7 @@ module GJKTutorial
                 //step 1. configure the ray direction
                 ray = new Raycast(convexB.GetCenterCoord(), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()).magnitude);
                 framework.AddCustomDrawFunctionAfterDrawConvex(drawGJKStepCustom);
-                canvas.addEventListener('mousedown', mouseDownFunc);
-                canvas.addEventListener('mouseup', mouseUpFunc);
-                canvas.addEventListener('mousemove', mouseMoveFunc);
+                framework.RegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
                 let lastTime = Date.now();
                 animUpdateIntervalHandle = setInterval(()=>{
                     let currentTime = Date.now();
@@ -276,9 +261,7 @@ module GJKTutorial
                 }, 16);
                 return;
             }else{
-                canvas.removeEventListener('mousedown', mouseDownFunc);
-                canvas.removeEventListener('mouseup', mouseUpFunc);
-                canvas.removeEventListener('mousemove', mouseMoveFunc);
+                framework.UnRegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
             }
 
             let lastStep = stepStack.length > 0 ? stepStack[stepStack.length - 1] : null;
@@ -328,9 +311,7 @@ module GJKTutorial
             stepClear(null);
             ray = new Raycast(convexB.GetCenterCoord(), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()).magnitude);
             framework.AddCustomDrawFunctionAfterDrawConvex(drawGJKRuntimeCustom);
-            canvas.addEventListener('mousedown', mouseDownFunc);
-            canvas.addEventListener('mouseup', mouseUpFunc);
-            canvas.addEventListener('mousemove', mouseMoveFunc);
+            framework.RegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
         }
 
         let runtimeEnd = function(evt)
@@ -341,9 +322,7 @@ module GJKTutorial
             }
             runtimeRunning = false;
             framework.RmvCustomDrawFunctionAfterDrawConvex(drawGJKRuntimeCustom);
-            canvas.removeEventListener('mousedown', mouseDownFunc);
-            canvas.removeEventListener('mouseup', mouseUpFunc);
-            canvas.removeEventListener('mousemove', mouseMoveFunc);
+            framework.UnRegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
         }
 
 

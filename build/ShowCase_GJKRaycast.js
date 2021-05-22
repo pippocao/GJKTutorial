@@ -126,11 +126,7 @@ var GJKTutorial;
             let rayEndPos = coord.GetCanvasPosByCoord(startPoint.Add(ray.Dir.Mul(ray.Length)));
             GJKTutorial.drawArrow(context, rayStartPos, rayEndPos, 20, 4, 'red');
         };
-        let bMouseDown = false;
         let mouseDownFunc = (evt) => {
-            if (evt.button != 0) {
-                return;
-            }
             let pos = new GJKTutorial.Vec2(evt.offsetX, evt.offsetY);
             let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
             let convexAB = framework.GetConvexAB();
@@ -142,12 +138,8 @@ var GJKTutorial;
             ray.Point = startP;
             ray.Dir = dir;
             ray.Length = dir.magnitude;
-            bMouseDown = true;
         };
         let mouseMoveFunc = (evt) => {
-            if (evt.button != 0 || !bMouseDown) {
-                return;
-            }
             let pos = new GJKTutorial.Vec2(evt.offsetX, evt.offsetY);
             let coord = framework.GetCoordinate().GetCoordByCanvasPos(pos);
             let convexAB = framework.GetConvexAB();
@@ -164,7 +156,6 @@ var GJKTutorial;
             if (evt.button != 0) {
                 return;
             }
-            bMouseDown = false;
         };
         let AnimUpdate = function (deltaMs) {
             if (showStepStatus.Anim != status) {
@@ -190,9 +181,7 @@ var GJKTutorial;
         let stepClear = function (evt) {
             stepStack = [];
             ray = null;
-            canvas.removeEventListener('mousedown', mouseDownFunc);
-            canvas.removeEventListener('mouseup', mouseUpFunc);
-            canvas.removeEventListener('mousemove', mouseMoveFunc);
+            framework.UnRegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
             clearInterval(animUpdateIntervalHandle);
             animUpdateIntervalHandle = -1;
             GJKTutorial.EnableDraggingConvexObj();
@@ -218,9 +207,7 @@ var GJKTutorial;
                 //step 1. configure the ray direction
                 ray = new GJKTutorial.Raycast(convexB.GetCenterCoord(), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()).magnitude);
                 framework.AddCustomDrawFunctionAfterDrawConvex(drawGJKStepCustom);
-                canvas.addEventListener('mousedown', mouseDownFunc);
-                canvas.addEventListener('mouseup', mouseUpFunc);
-                canvas.addEventListener('mousemove', mouseMoveFunc);
+                framework.RegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
                 let lastTime = Date.now();
                 animUpdateIntervalHandle = setInterval(() => {
                     let currentTime = Date.now();
@@ -230,9 +217,7 @@ var GJKTutorial;
                 return;
             }
             else {
-                canvas.removeEventListener('mousedown', mouseDownFunc);
-                canvas.removeEventListener('mouseup', mouseUpFunc);
-                canvas.removeEventListener('mousemove', mouseMoveFunc);
+                framework.UnRegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
             }
             let lastStep = stepStack.length > 0 ? stepStack[stepStack.length - 1] : null;
             if (status == showStepStatus.None || status == showStepStatus.AfterAnim) {
@@ -273,9 +258,7 @@ var GJKTutorial;
             stepClear(null);
             ray = new GJKTutorial.Raycast(convexB.GetCenterCoord(), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()), convexA.GetCenterCoord().Sub(convexB.GetCenterCoord()).magnitude);
             framework.AddCustomDrawFunctionAfterDrawConvex(drawGJKRuntimeCustom);
-            canvas.addEventListener('mousedown', mouseDownFunc);
-            canvas.addEventListener('mouseup', mouseUpFunc);
-            canvas.addEventListener('mousemove', mouseMoveFunc);
+            framework.RegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
         };
         let runtimeEnd = function (evt) {
             if (!runtimeRunning) {
@@ -283,9 +266,7 @@ var GJKTutorial;
             }
             runtimeRunning = false;
             framework.RmvCustomDrawFunctionAfterDrawConvex(drawGJKRuntimeCustom);
-            canvas.removeEventListener('mousedown', mouseDownFunc);
-            canvas.removeEventListener('mouseup', mouseUpFunc);
-            canvas.removeEventListener('mousemove', mouseMoveFunc);
+            framework.UnRegisterLeftMouseEvent(mouseDownFunc, mouseMoveFunc, mouseUpFunc);
         };
         clearBtn.onclick = stepClear;
         undoBtn.onclick = stepUndo;
