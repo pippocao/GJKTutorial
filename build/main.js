@@ -102,7 +102,7 @@ var GJKTutorial;
         }
         //////////////////////////////////////////////////////////////////////
         /////////////////////Paint Tools///////////////////////
-        GJKTutorial.InitShowCase_Paint(framework, canvas, document.getElementById("strokeColors"), document.getElementById("fillColors"), document.getElementById("lineThick"), document.getElementById("lineMedium"), document.getElementById("lineThin"), document.getElementById("SolidLine"), document.getElementById("DashLine"), document.getElementById("drawLine"), document.getElementById("drawCircle"), document.getElementById("drawRectangle"), document.getElementById("drawArrow"));
+        GJKTutorial.InitShowCase_Paint(framework, canvas, document.getElementById("strokeColors"), document.getElementById("fillColors"), document.getElementById("lineThick"), document.getElementById("lineMedium"), document.getElementById("lineThin"), document.getElementById("SolidLine"), document.getElementById("DashLine"), document.getElementById("disablePaint"), document.getElementById("drawLine"), document.getElementById("drawCircle"), document.getElementById("drawRectangle"), document.getElementById("drawArrow"), document.getElementById("undoPaint"), document.getElementById("clearPaint"));
         /////////////////////Paint Tools///////////////////////
     };
 })(GJKTutorial || (GJKTutorial = {}));

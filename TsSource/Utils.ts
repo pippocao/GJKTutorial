@@ -164,7 +164,6 @@ module GJKTutorial
     {
         context.lineWidth = width;
         context.strokeStyle = color;
-        context.setLineDash([]);
         context.moveTo(startPos.x, startPos.y);
         context.beginPath();
         context.lineTo(startPos.x, startPos.y);

@@ -140,10 +140,13 @@ module GJKTutorial
             document.getElementById("lineThin"),
             document.getElementById("SolidLine"),
             document.getElementById("DashLine"),
+            document.getElementById("disablePaint"),
             document.getElementById("drawLine"),
             document.getElementById("drawCircle"),
             document.getElementById("drawRectangle"),
             document.getElementById("drawArrow"),
+            document.getElementById("undoPaint"),
+            document.getElementById("clearPaint"),
             );
         /////////////////////Paint Tools///////////////////////
     };
