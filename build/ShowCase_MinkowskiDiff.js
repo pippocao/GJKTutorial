@@ -5,9 +5,10 @@ var GJKTutorial;
         for (let i = 0; i < conv1.GetVertices().length; ++i) {
             for (let j = 0; j < conv2.GetVertices().length; ++j) {
                 let vertex = new GJKTutorial.Vertex(conv1.GetVertices()[i].coord.Sub(conv2.GetVertices()[j].coord), "");
-                vertex.drawName = false;
-                vertex.name = conv1.GetVertices()[i].name + "-" + conv2.GetVertices()[j].name;
-                result.push(vertex);
+                let simplexVertex = new GJKTutorial.SimplexVertex(vertex, conv1.GetVertices()[i], conv2.GetVertices()[j]);
+                simplexVertex.drawName = false;
+                simplexVertex.name = conv1.GetVertices()[i].name + "-" + conv2.GetVertices()[j].name;
+                result.push(simplexVertex);
             }
         }
         return result;
@@ -45,7 +46,7 @@ var GJKTutorial;
                     context.arc(pos.x, pos.y, 3, 0, 360, false);
                     context.fill();
                     context.closePath();
-                    context.fillText(i + "", pos.x, pos.y);
+                    context.fillText(allVertices[i].name + "", pos.x, pos.y);
                 }
             }
             //Draw Edges

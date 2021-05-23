@@ -1,16 +1,17 @@
 module GJKTutorial
 {
-    function GetFullMinkowskiDiffVertices(conv1 : Convex, conv2 : Convex) : Vertex[]
+    function GetFullMinkowskiDiffVertices(conv1 : Convex, conv2 : Convex) : SimplexVertex[]
     {
-        let result : Vertex[] = [];
+        let result : SimplexVertex[] = [];
         for(let i = 0; i < conv1.GetVertices().length; ++i)
         {
             for(let j = 0; j < conv2.GetVertices().length; ++j)
             {
                 let vertex = new Vertex(conv1.GetVertices()[i].coord.Sub(conv2.GetVertices()[j].coord), "");
-                vertex.drawName = false;
-                vertex.name = conv1.GetVertices()[i].name + "-" + conv2.GetVertices()[j].name;
-                result.push(vertex);
+                let simplexVertex = new SimplexVertex(vertex, conv1.GetVertices()[i], conv2.GetVertices()[j]);
+                simplexVertex.drawName = false;
+                simplexVertex.name = conv1.GetVertices()[i].name + "-" + conv2.GetVertices()[j].name;
+                result.push(simplexVertex);
             }
         }
         return result;
@@ -21,7 +22,7 @@ module GJKTutorial
     {
         let drawEdgeNum = -1;
         let timeBeginMs = 0;
-        let allVertices : Vertex[] = [];
+        let allVertices : SimplexVertex[] = [];
         let drawFullMinkowskiDiff = (deltaMs : number, coord : Coordinate, context : CanvasRenderingContext2D)=>{
             
             let convexAB = framework.GetConvexAB();
@@ -63,7 +64,7 @@ module GJKTutorial
                     context.arc(pos.x, pos.y, 3, 0, 360, false);
                     context.fill();
                     context.closePath();
-                    context.fillText(i + "", pos.x, pos.y);
+                    context.fillText(allVertices[i].name + "", pos.x, pos.y);
                 }
             }
 
