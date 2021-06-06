@@ -109,11 +109,11 @@ var GJKTutorial;
         let stepResult = new EPAStepResult();
         stepResult.simplex = new GJKTutorial.Simplex();
         stepResult.simplex.SetVertices(lastStep.simplex.GetVertices());
-        stepResult.supportDir = EPAGetBestNextSupportDir(stepResult.simplex);
-        let mingkowskiDiffVertex = SupportDifference(convexA, convexB, stepResult.supportDir);
+        let mingkowskiDiffVertex = SupportDifference(convexA, convexB, lastStep.supportDir);
         let newSimplexVertex = new GJKTutorial.SimplexVertex(mingkowskiDiffVertex.diff, mingkowskiDiffVertex.vertexA, mingkowskiDiffVertex.vertexB);
         stepResult.simplex.AddVertex(newSimplexVertex);
         stepResult.simplex.Rebuild();
+        stepResult.supportDir = EPAGetBestNextSupportDir(stepResult.simplex);
         return stepResult;
     }
     GJKTutorial.EPAStep = EPAStep;

@@ -143,12 +143,11 @@ module GJKTutorial
         stepResult.simplex = new Simplex();
         stepResult.simplex.SetVertices(lastStep.simplex.GetVertices());
 
-        stepResult.supportDir = EPAGetBestNextSupportDir(stepResult.simplex);
-
-        let mingkowskiDiffVertex = SupportDifference(convexA, convexB, stepResult.supportDir);
+        let mingkowskiDiffVertex = SupportDifference(convexA, convexB, lastStep.supportDir);
         let newSimplexVertex = new SimplexVertex(mingkowskiDiffVertex.diff, mingkowskiDiffVertex.vertexA, mingkowskiDiffVertex.vertexB);
         stepResult.simplex.AddVertex(newSimplexVertex);
         stepResult.simplex.Rebuild();
+        stepResult.supportDir = EPAGetBestNextSupportDir(stepResult.simplex);
         return stepResult;
     }
 
