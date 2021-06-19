@@ -38,6 +38,10 @@ var GJKTutorial;
                     this.leftMouseMove(evt);
                 }
             });
+            this.canvas.addEventListener("wheel", (evt) => {
+                this.coord.coordXMax += evt.deltaY / 100;
+                this.coord.coordYMax += evt.deltaY / 100;
+            });
         }
         update(deltaMs) {
             this.ClearCanvas();

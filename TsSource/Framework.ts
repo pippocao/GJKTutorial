@@ -49,6 +49,11 @@ module GJKTutorial
                     this.leftMouseMove(evt);
                 }
             });
+            this.canvas.addEventListener("wheel", (evt : WheelEvent)=>{
+                this.coord.coordXMax += evt.deltaY / 100;
+                this.coord.coordYMax += evt.deltaY / 100;
+                evt.preventDefault();
+            });
         }
 
 
