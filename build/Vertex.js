@@ -3,7 +3,7 @@ var GJKTutorial;
     class Vertex {
         constructor(inCoord, inName) {
             this.drawName = true; //toggle for name display;
-            this.coord = new GJKTutorial.Vec2(inCoord.x, inCoord.y);
+            this.coord = inCoord.Clone();
             this.name = inName;
         }
         get name() {

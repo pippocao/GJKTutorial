@@ -1,6 +1,6 @@
 var GJKTutorial;
 (function (GJKTutorial) {
-    class Simplex extends GJKTutorial.Convex {
+    class Simplex extends GJKTutorial.Polygon {
         IncludeOrigin() {
             return this.IsPointInConvex(new GJKTutorial.Vec2(0, 0));
         }

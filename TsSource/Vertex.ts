@@ -19,7 +19,7 @@ module GJKTutorial
 
         constructor(inCoord : Vec2, inName : string)
         {
-            this.coord = new Vec2(inCoord.x, inCoord.y);
+            this.coord = inCoord.Clone();
             this.name = inName;
         }
 

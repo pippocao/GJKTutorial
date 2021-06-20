@@ -18,13 +18,13 @@ var GJKTutorial;
         let canvas = document.getElementById('canvas');
         let framework = new GJKTutorial.Framework(canvas);
         /////////////////////Default Convex Objects////////////////////
-        let conv = new GJKTutorial.Convex();
+        let conv = new GJKTutorial.Polygon();
         conv.AddVertex(new GJKTutorial.Vertex(new GJKTutorial.Vec2(6, 8), "a"));
         conv.AddVertex(new GJKTutorial.Vertex(new GJKTutorial.Vec2(5, 2), "b"));
         conv.AddVertex(new GJKTutorial.Vertex(new GJKTutorial.Vec2(1, 6), "c"));
         conv.name = "A";
         framework.AddConvex(conv);
-        conv = new GJKTutorial.Convex();
+        conv = new GJKTutorial.Polygon();
         conv.AddVertex(new GJKTutorial.Vertex(new GJKTutorial.Vec2(6, 4), "d"));
         conv.AddVertex(new GJKTutorial.Vertex(new GJKTutorial.Vec2(2, 2), "e"));
         conv.AddVertex(new GJKTutorial.Vertex(new GJKTutorial.Vec2(5, -2), "f"));
@@ -32,11 +32,12 @@ var GJKTutorial;
         framework.AddConvex(conv);
         /////////////////////Default Convex Objects////////////////////
         /////////////////////Custom Convex Functions////////////////////
+        let addTypeSelector = document.getElementById('ConvexType');
         let buttonClear = document.getElementById('ClearAllConvex');
         let buttonBeginAdd = document.getElementById('BeginAddNewConvex');
         let buttonFinishAdd = document.getElementById('FinishAddNewConvex');
         let buttonCancel = document.getElementById('CancelAddNewConvex');
-        GJKTutorial.InitShowCase_DrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel);
+        GJKTutorial.InitShowCase_DrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel, addTypeSelector);
         /////////////////////Custom Convex Functions////////////////////
         /////////////////////Full Minkowski Difference Preview////////////////////
         let buttonToggleMinkowskiDiff = document.getElementById("MinkowskiDiffToggle");

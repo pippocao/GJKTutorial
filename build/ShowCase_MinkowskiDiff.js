@@ -2,12 +2,18 @@ var GJKTutorial;
 (function (GJKTutorial) {
     function GetFullMinkowskiDiffVertices(conv1, conv2) {
         let result = [];
-        for (let i = 0; i < conv1.GetVertices().length; ++i) {
-            for (let j = 0; j < conv2.GetVertices().length; ++j) {
-                let vertex = new GJKTutorial.Vertex(conv1.GetVertices()[i].coord.Sub(conv2.GetVertices()[j].coord), "");
-                let simplexVertex = new GJKTutorial.SimplexVertex(vertex, conv1.GetVertices()[i], conv2.GetVertices()[j]);
+        let poly1 = conv1;
+        let poly2 = conv2;
+        if (!(poly1 instanceof GJKTutorial.Polygon) || !(poly2 instanceof GJKTutorial.Polygon)) {
+            window.alert("Only Polygon Objects can draw Full Minkowski Difference!");
+            return result;
+        }
+        for (let i = 0; i < poly1.GetVertices().length; ++i) {
+            for (let j = 0; j < poly2.GetVertices().length; ++j) {
+                let vertex = new GJKTutorial.Vertex(poly1.GetVertices()[i].coord.Sub(poly2.GetVertices()[j].coord), "");
+                let simplexVertex = new GJKTutorial.SimplexVertex(vertex, poly1.GetVertices()[i].coord, poly2.GetVertices()[j].coord);
                 simplexVertex.drawName = false;
-                simplexVertex.name = conv1.GetVertices()[i].name + "-" + conv2.GetVertices()[j].name;
+                simplexVertex.name = poly1.GetVertices()[i].name + "-" + poly2.GetVertices()[j].name;
                 result.push(simplexVertex);
             }
         }
@@ -25,6 +31,9 @@ var GJKTutorial;
             let convexA = convexAB.A;
             let convexB = convexAB.B;
             allVertices = GetFullMinkowskiDiffVertices(convexA, convexB);
+            if (allVertices.length < 3) {
+                return;
+            }
             let diffOutlineVertices = GJKTutorial.GetConvexFromVertices(allVertices);
             if (diffOutlineVertices.length < 3) {
                 return;

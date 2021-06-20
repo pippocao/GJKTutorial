@@ -30,7 +30,7 @@ var GJKTutorial;
             endPos = startPos.Add(endPos.Sub(startPos).Normalize().Mul(bestLength));
             GJKTutorial.drawArrow(context, startPos, endPos, bestLength / 10, 4, 'red');
             //check if epa is finished.
-            let bFinished = (stepStack.length >= 2 && stepStack[stepStack.length - 2].simplex.GetVertices().length == drawStep.simplex.GetVertices().length);
+            let bFinished = (stepStack.length >= 2 && drawStep.isLastStep);
             if (bFinished) {
                 let resolveResult = GJKTutorial.ResolveEPAStep(drawStep);
                 GJKTutorial.drawArrow(context, coord.GetCanvasPosByCoord(resolveResult.penetrationPointOnConvexA), coord.GetCanvasPosByCoord(resolveResult.penetrationPointOnConvexB), 0, 2, 'blue');

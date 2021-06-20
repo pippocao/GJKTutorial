@@ -46,7 +46,7 @@ var GJKTutorial;
             }
         }
         let supportDifference = SupportDifference(convexA, convexB, supportDir);
-        let simplexVertex = new GJKTutorial.SimplexVertex(supportDifference.diff, supportDifference.vertexA, supportDifference.vertexB);
+        let simplexVertex = new GJKTutorial.SimplexVertex(supportDifference.diff, supportDifference.vertexA.coord, supportDifference.vertexB.coord);
         newSimplexVertices.push(simplexVertex);
         stepResult.simplex.SetVertices(newSimplexVertices);
         return stepResult;
@@ -59,12 +59,12 @@ var GJKTutorial;
         let simplex = new GJKTutorial.Simplex();
         let supportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
         let initSupportDifference = SupportDifference(convexA, convexB, supportDir);
-        let initSimplexVertex = new GJKTutorial.SimplexVertex(initSupportDifference.diff, initSupportDifference.vertexA, initSupportDifference.vertexB);
+        let initSimplexVertex = new GJKTutorial.SimplexVertex(initSupportDifference.diff, initSupportDifference.vertexA.coord, initSupportDifference.vertexB.coord);
         simplex.AddVertex(initSimplexVertex);
         supportDir = supportDir.Mul(-1);
         while (true) {
             let supportDifference = SupportDifference(convexA, convexB, supportDir);
-            let simplexVertex = new GJKTutorial.SimplexVertex(supportDifference.diff, supportDifference.vertexA, supportDifference.vertexB);
+            let simplexVertex = new GJKTutorial.SimplexVertex(supportDifference.diff, supportDifference.vertexA.coord, supportDifference.vertexB.coord);
             if (simplexVertex.coord.Dot(supportDir) <= 0) {
                 //will never collid
                 return null;
@@ -86,6 +86,10 @@ var GJKTutorial;
         constructor() {
             this.supportDir = new GJKTutorial.Vec2();
             this.simplex = new GJKTutorial.Simplex();
+            this.closestEdgeToOrigin = null;
+            this.closestToOriginPointOnEdge = null;
+            this.closestDistanceSqr = Number.MIN_SAFE_INTEGER;
+            this.isLastStep = false;
         }
     }
     GJKTutorial.EPAStepResult = EPAStepResult;
@@ -97,7 +101,13 @@ var GJKTutorial;
         }
         let dir = nearestVertices[0].coord.Sub(nearestVertices[1].coord);
         let supportDir = new GJKTutorial.Vec2(-dir.y, dir.x);
-        if (nearestVertices[0].coord.Dot(supportDir) < 0) {
+        /* This is fast but have some accuracy issue
+        if(nearestVertices[0].coord.Dot(supportDir) < 0)
+        {
+            supportDir = supportDir.Mul(-1);
+        }*/
+        if (simplex.GetVertices()[1].coord.Sub(simplex.GetVertices()[0].coord)
+            .Cross(simplex.GetVertices()[2].coord.Sub(simplex.GetVertices()[1].coord)) < 0) {
             supportDir = supportDir.Mul(-1);
         }
         return supportDir;
@@ -110,35 +120,59 @@ var GJKTutorial;
         stepResult.simplex = new GJKTutorial.Simplex();
         stepResult.simplex.SetVertices(lastStep.simplex.GetVertices());
         let mingkowskiDiffVertex = SupportDifference(convexA, convexB, lastStep.supportDir);
-        let newSimplexVertex = new GJKTutorial.SimplexVertex(mingkowskiDiffVertex.diff, mingkowskiDiffVertex.vertexA, mingkowskiDiffVertex.vertexB);
+        let newSimplexVertex = new GJKTutorial.SimplexVertex(mingkowskiDiffVertex.diff, mingkowskiDiffVertex.vertexA.coord, mingkowskiDiffVertex.vertexB.coord);
         stepResult.simplex.AddVertex(newSimplexVertex);
         stepResult.simplex.Rebuild();
-        stepResult.supportDir = EPAGetBestNextSupportDir(stepResult.simplex);
+        if (stepResult.simplex.GetVertices().length <= lastStep.simplex.GetVertices().length) {
+            stepResult.isLastStep = true;
+            stepResult.supportDir = lastStep.supportDir;
+            stepResult.closestEdgeToOrigin = [...lastStep.closestEdgeToOrigin];
+            stepResult.closestToOriginPointOnEdge = lastStep.closestToOriginPointOnEdge.Clone();
+            stepResult.closestDistanceSqr = lastStep.closestDistanceSqr;
+        }
+        else {
+            stepResult.supportDir = EPAGetBestNextSupportDir(stepResult.simplex);
+            stepResult.closestEdgeToOrigin = [...stepResult.simplex.GetClosestEdgeToOrigin()];
+            stepResult.closestToOriginPointOnEdge = GJKTutorial.ClosestPointOnSegment(new GJKTutorial.Vec2(0, 0), stepResult.closestEdgeToOrigin[0].coord, stepResult.closestEdgeToOrigin[1].coord);
+            stepResult.closestDistanceSqr = stepResult.closestToOriginPointOnEdge.magnitudeSqr;
+        }
         return stepResult;
     }
     GJKTutorial.EPAStep = EPAStep;
     //if step is the final iteration result of EPA
     //calculate the penetration depth and correspond points on ConvexA and ConvexB
     function ResolveEPAStep(step) {
-        //draw the penetration vertices.
-        let closestEdgeToOrigin = step.simplex.GetClosestEdgeToOrigin();
-        let closestToOriginPointOnEdge = GJKTutorial.ClosestPointOnSegment(new GJKTutorial.Vec2(0, 0), closestEdgeToOrigin[0].coord, closestEdgeToOrigin[1].coord);
         let penetrationCoordA = null;
         let penetrationCoordB = null;
-        let convexAEdgeMagnitudeSqr = closestEdgeToOrigin[0].GetConvexVerticeA().coord.Sub(closestEdgeToOrigin[1].GetConvexVerticeA().coord).magnitudeSqr;
-        let convexBEdgeMagnitudeSqr = closestEdgeToOrigin[0].GetConvexVerticeB().coord.Sub(closestEdgeToOrigin[1].GetConvexVerticeB().coord).magnitudeSqr;
-        if (convexAEdgeMagnitudeSqr == 0) {
-            penetrationCoordA = closestEdgeToOrigin[0].GetConvexVerticeA().coord.Clone();
+        let convexAEdgeMagnitudeSqr = step.closestEdgeToOrigin[0].GetConvexCoordA().Sub(step.closestEdgeToOrigin[1].GetConvexCoordA()).magnitudeSqr;
+        let convexBEdgeMagnitudeSqr = step.closestEdgeToOrigin[0].GetConvexCoordB().Sub(step.closestEdgeToOrigin[1].GetConvexCoordB()).magnitudeSqr;
+        //p, p1, p2 must be collineation (p1, p, p2 is on a line)
+        let GetRatio = function (p, p1, p2) {
+            let diffX = p1.x - p2.x;
+            let diffY = p1.y - p2.y;
+            if (diffX == 0 && diffY == 0) {
+                return 1;
+            }
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                return (p.x - p1.x) / (p2.x - p1.x);
+            }
+            else {
+                return (p.x - p1.x) / (p2.x - p1.x);
+            }
+        };
+        if (Math.abs(convexAEdgeMagnitudeSqr) < Number.EPSILON) {
+            penetrationCoordA = step.closestEdgeToOrigin[0].GetConvexCoordA().Clone();
         }
         else {
-            penetrationCoordA = closestEdgeToOrigin[0].GetConvexVerticeA().coord.Add(closestToOriginPointOnEdge.Sub(closestEdgeToOrigin[0].coord));
+            let ratio = GetRatio(step.closestToOriginPointOnEdge, step.closestEdgeToOrigin[0].coord, step.closestEdgeToOrigin[1].coord);
+            penetrationCoordA = GJKTutorial.Lerp01(step.closestEdgeToOrigin[0].GetConvexCoordA(), step.closestEdgeToOrigin[1].GetConvexCoordA(), ratio);
         }
-        if (convexBEdgeMagnitudeSqr == 0) {
-            penetrationCoordB = closestEdgeToOrigin[0].GetConvexVerticeB().coord.Clone();
+        if (Math.abs(convexBEdgeMagnitudeSqr) < Number.EPSILON) {
+            penetrationCoordB = step.closestEdgeToOrigin[0].GetConvexCoordB().Clone();
         }
         else {
-            //convexB is minuend in minkowski difference, so we use - instead of +
-            penetrationCoordB = closestEdgeToOrigin[0].GetConvexVerticeB().coord.Sub(closestToOriginPointOnEdge.Sub(closestEdgeToOrigin[0].coord));
+            let ratio = GetRatio(step.closestToOriginPointOnEdge, step.closestEdgeToOrigin[0].coord, step.closestEdgeToOrigin[1].coord);
+            penetrationCoordB = GJKTutorial.Lerp01(step.closestEdgeToOrigin[0].GetConvexCoordB(), step.closestEdgeToOrigin[1].GetConvexCoordB(), ratio);
         }
         return { penetrationDepthAtoB: penetrationCoordA.Sub(penetrationCoordB), penetrationPointOnConvexA: penetrationCoordA, penetrationPointOnConvexB: penetrationCoordB };
     }
@@ -151,14 +185,16 @@ var GJKTutorial;
         if (!initSimplex) {
             return null;
         }
+        let allSteps = [];
         let lastStep = new EPAStepResult();
         lastStep.simplex = initSimplex;
         lastStep.supportDir = EPAGetBestNextSupportDir(initSimplex);
         while (true) {
             let newStep = EPAStep(convexA, convexB, lastStep);
-            if (lastStep.simplex.GetVertices().length == newStep.simplex.GetVertices().length) {
+            allSteps.push(newStep);
+            if (newStep.isLastStep) {
                 //iteration quit
-                return ResolveEPAStep(lastStep);
+                return ResolveEPAStep(newStep);
             }
             else {
                 lastStep = newStep;
@@ -190,7 +226,7 @@ var GJKTutorial;
             result.minLength = 0;
             let initSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
             let initSupportDiff = SupportDifference(convexA, convexB, initSupportDir);
-            result.simplex.AddVertex(new GJKTutorial.SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA, initSupportDiff.vertexB));
+            result.simplex.AddVertex(new GJKTutorial.SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA.coord, initSupportDiff.vertexB.coord));
             result.closestPointToOriginAfterMoving = result.simplex.GetVertices()[0].coord;
             result.degeneratedSimplex = new GJKTutorial.Simplex();
             result.degeneratedSimplex.SetVertices(result.simplex.GetVertices());
@@ -201,7 +237,7 @@ var GJKTutorial;
         result.simplex.SetVertices(lastStepResult.degeneratedSimplex.GetVertices());
         result.supportDir = closestPointToOrigin.Mul(-1);
         let newSupportDiff = SupportDifference(convexA, convexB, result.supportDir);
-        let newSupportDiffVertex = new GJKTutorial.SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA, newSupportDiff.vertexB);
+        let newSupportDiffVertex = new GJKTutorial.SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA.coord, newSupportDiff.vertexB.coord);
         result.simplex.AddVertex(newSupportDiffVertex);
         let dotSupportDiffVertices = (closestPointToOrigin.Dot(newSupportDiffVertex.coord));
         if (dotSupportDiffVertices > 0) {
@@ -235,14 +271,14 @@ var GJKTutorial;
         let initSupportDir = convexA.GetCenterCoord().Sub(convexB.GetCenterCoord());
         let initSupportDiff = SupportDifference(convexA, convexB, initSupportDir);
         let simplex = new GJKTutorial.Simplex();
-        simplex.AddVertex(new GJKTutorial.SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA, initSupportDiff.vertexB));
+        simplex.AddVertex(new GJKTutorial.SimplexVertex(initSupportDiff.diff, initSupportDiff.vertexA.coord, initSupportDiff.vertexB.coord));
         let closestPointToOrigin = simplex.GetVertices()[0].coord;
         let supportDir = simplex.GetVertices()[0].coord.Mul(-1);
         let closestDistance = Number.MAX_SAFE_INTEGER;
         while (true) {
             let newSupportDiff = SupportDifference(convexA, convexB, supportDir);
             newSupportDiff.diff.coord = newSupportDiff.diff.coord.Sub(ray.Dir.Mul(lumda));
-            let newSupportDiffVertex = new GJKTutorial.SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA, newSupportDiff.vertexB);
+            let newSupportDiffVertex = new GJKTutorial.SimplexVertex(newSupportDiff.diff, newSupportDiff.vertexA.coord, newSupportDiff.vertexB.coord);
             let dotSupportDiffVertices = (closestPointToOrigin.Dot(newSupportDiffVertex.coord));
             if (dotSupportDiffVertices > 0) {
                 let needMoveDistance = dotSupportDiffVertices / ray.Dir.Dot(closestPointToOrigin);
@@ -276,43 +312,36 @@ var GJKTutorial;
             }
             supportDir = closestPointToOrigin.Mul(-1);
             let distance = closestPointToOrigin.magnitudeSqr;
-            if (closestPointToOrigin.magnitudeSqr < Number.EPSILON) {
-                let result = new GJKRaycastHitResult();
-                result.distance = lumda;
-                if (simplex.GetVertices().length == 1) {
-                    result.pointA = simplex.GetVertices()[0].GetConvexVerticeA().coord;
-                    result.pointB = simplex.GetVertices()[0].GetConvexVerticeB().coord;
-                    result.normalA = ray.Dir.Mul(-1);
-                    result.normalB = ray.Dir.Clone();
-                }
-                else {
-                    let ratioTo0 = closestPointToOrigin.Sub(simplex.GetVertices()[0].coord).magnitude / simplex.GetVertices()[1].coord.Sub(simplex.GetVertices()[0].coord).magnitude;
-                    result.pointA = GJKTutorial.Lerp01(simplex.GetVertices()[0].GetConvexVerticeA().coord, simplex.GetVertices()[1].GetConvexVerticeA().coord, ratioTo0);
-                    result.pointB = GJKTutorial.Lerp01(simplex.GetVertices()[0].GetConvexVerticeB().coord, simplex.GetVertices()[1].GetConvexVerticeB().coord, ratioTo0);
-                    let normal = simplex.GetVertices()[0].coord.Sub(simplex.GetVertices()[1].coord);
-                    normal = new GJKTutorial.Vec2(-normal.y, normal.x);
-                    if (normal.Dot(ray.Dir) > 0) {
-                        result.normalB = normal;
-                        result.normalA = normal.Mul(-1);
+            if ((closestPointToOrigin.magnitudeSqr < Number.EPSILON || distance >= closestDistance)) {
+                if (lumda > 0) {
+                    let result = new GJKRaycastHitResult();
+                    result.distance = lumda;
+                    if (simplex.GetVertices().length == 1) {
+                        result.pointA = simplex.GetVertices()[0].GetConvexCoordA();
+                        result.pointB = simplex.GetVertices()[0].GetConvexCoordB();
+                        result.normalA = ray.Dir.Mul(-1);
+                        result.normalB = ray.Dir.Clone();
                     }
                     else {
-                        result.normalB = normal.Mul(-1);
-                        result.normalA = normal;
+                        let ratioTo0 = closestPointToOrigin.Sub(simplex.GetVertices()[0].coord).magnitude / simplex.GetVertices()[1].coord.Sub(simplex.GetVertices()[0].coord).magnitude;
+                        result.pointA = GJKTutorial.Lerp01(simplex.GetVertices()[0].GetConvexCoordA(), simplex.GetVertices()[1].GetConvexCoordA(), ratioTo0);
+                        result.pointB = GJKTutorial.Lerp01(simplex.GetVertices()[0].GetConvexCoordB(), simplex.GetVertices()[1].GetConvexCoordB(), ratioTo0);
+                        let normal = simplex.GetVertices()[0].coord.Sub(simplex.GetVertices()[1].coord);
+                        normal = new GJKTutorial.Vec2(-normal.y, normal.x).Normalize();
+                        if (normal.Dot(ray.Dir) > 0) {
+                            result.normalB = normal;
+                            result.normalA = normal.Mul(-1);
+                        }
+                        else {
+                            result.normalB = normal.Mul(-1);
+                            result.normalA = normal;
+                        }
                     }
+                    return result;
                 }
-                return result;
-            }
-            else if (distance >= closestDistance) //A and B is already collided
-             {
-                //do EPA
-                let epaResult = EAPTest(convexA, convexB);
-                let result = new GJKRaycastHitResult();
-                result.distance = 0;
-                result.pointA = epaResult.penetrationPointOnConvexA;
-                result.pointB = epaResult.penetrationPointOnConvexB;
-                result.normalA = epaResult.penetrationDepthAtoB;
-                result.normalB = epaResult.penetrationDepthAtoB.Mul(-1);
-                return result;
+                else {
+                    return null;
+                }
             }
             closestDistance = distance;
         }

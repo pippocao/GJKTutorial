@@ -25,7 +25,7 @@ module GJKTutorial
         let framework = new Framework(canvas);
     
         /////////////////////Default Convex Objects////////////////////
-        let conv = new Convex();
+        let conv = new Polygon();
         conv.AddVertex(new Vertex(new Vec2(6, 8), "a"));
         conv.AddVertex(new Vertex(new Vec2(5, 2), "b"));
         conv.AddVertex(new Vertex(new Vec2(1, 6), "c"));
@@ -33,7 +33,7 @@ module GJKTutorial
         framework.AddConvex(conv);
     
         
-        conv = new Convex();
+        conv = new Polygon();
         conv.AddVertex(new Vertex(new Vec2(6, 4), "d"));
         conv.AddVertex(new Vertex(new Vec2(2, 2), "e"));
         conv.AddVertex(new Vertex(new Vec2(5, -2), "f"));
@@ -42,12 +42,13 @@ module GJKTutorial
         /////////////////////Default Convex Objects////////////////////
 
         /////////////////////Custom Convex Functions////////////////////
+        let addTypeSelector = (document.getElementById('ConvexType') as HTMLSelectElement);
         let buttonClear = document.getElementById('ClearAllConvex');
         let buttonBeginAdd = document.getElementById('BeginAddNewConvex');
         let buttonFinishAdd = document.getElementById('FinishAddNewConvex');
         let buttonCancel = document.getElementById('CancelAddNewConvex');
 
-        InitShowCase_DrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel);
+        InitShowCase_DrawCustomConvex(framework, canvas, buttonClear, buttonBeginAdd, buttonFinishAdd, buttonCancel, addTypeSelector);
         /////////////////////Custom Convex Functions////////////////////
 
 

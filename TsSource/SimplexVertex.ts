@@ -3,24 +3,24 @@ module GJKTutorial
     //This type of vertex is used for Simplex
     export class SimplexVertex extends Vertex
     {
-        private m_convexAVertex : Vertex;
-        private m_convexBVertex : Vertex;
+        private m_convexACoord : Vec2;
+        private m_convexBCoord : Vec2;
 
-        constructor(diffVertex : Vertex, convexAVertex : Vertex, convexBVertex : Vertex)
+        constructor(diffVertex : Vertex, convexACoord : Vec2, convexBCoord : Vec2)
         {
             super(diffVertex.coord, diffVertex.name);
-            this.m_convexAVertex = convexAVertex;
-            this.m_convexBVertex = convexBVertex;
+            this.m_convexACoord = convexACoord.Clone();
+            this.m_convexBCoord = convexBCoord.Clone();
         }
 
-        public GetConvexVerticeA() : Readonly<Vertex>
+        public GetConvexCoordA() : Readonly<Vec2>
         {
-            return this.m_convexAVertex;
+            return this.m_convexACoord;
         }
         
-        public GetConvexVerticeB() : Readonly<Vertex>
+        public GetConvexCoordB() : Readonly<Vec2>
         {
-            return this.m_convexBVertex;
+            return this.m_convexBCoord;
         }
     }
 }

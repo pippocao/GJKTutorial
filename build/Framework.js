@@ -41,6 +41,7 @@ var GJKTutorial;
             this.canvas.addEventListener("wheel", (evt) => {
                 this.coord.coordXMax += evt.deltaY / 100;
                 this.coord.coordYMax += evt.deltaY / 100;
+                evt.preventDefault();
             });
         }
         update(deltaMs) {
@@ -116,7 +117,7 @@ var GJKTutorial;
         }
         DrawConvexObjs(deltaMs) {
             for (let i = 0; i < this.convexObjs.length; ++i) {
-                this.convexObjs[i].Draw(deltaMs, this.coord, this.context);
+                this.convexObjs[i].Draw(deltaMs, this.coord, this.context, 'black', this.convexObjs[i].fillColor);
             }
         }
         GetConvexObjsCount() {

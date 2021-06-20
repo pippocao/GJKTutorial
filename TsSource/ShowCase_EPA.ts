@@ -40,7 +40,7 @@ module GJKTutorial
             drawArrow(context, startPos, endPos, bestLength / 10, 4, 'red');
 
             //check if epa is finished.
-            let bFinished = (stepStack.length >= 2 && stepStack[stepStack.length - 2].simplex.GetVertices().length == drawStep.simplex.GetVertices().length);
+            let bFinished = (stepStack.length >= 2 && drawStep.isLastStep);
             if(bFinished)
             {
                 let resolveResult = ResolveEPAStep(drawStep);

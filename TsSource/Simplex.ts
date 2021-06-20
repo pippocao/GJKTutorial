@@ -1,6 +1,6 @@
 module GJKTutorial
 {
-    export class Simplex extends Convex
+    export class Simplex extends Polygon
     {
         public IncludeOrigin() : boolean
         {

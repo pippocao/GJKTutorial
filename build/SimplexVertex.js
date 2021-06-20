@@ -2,16 +2,16 @@ var GJKTutorial;
 (function (GJKTutorial) {
     //This type of vertex is used for Simplex
     class SimplexVertex extends GJKTutorial.Vertex {
-        constructor(diffVertex, convexAVertex, convexBVertex) {
+        constructor(diffVertex, convexACoord, convexBCoord) {
             super(diffVertex.coord, diffVertex.name);
-            this.m_convexAVertex = convexAVertex;
-            this.m_convexBVertex = convexBVertex;
+            this.m_convexACoord = convexACoord.Clone();
+            this.m_convexBCoord = convexBCoord.Clone();
         }
-        GetConvexVerticeA() {
-            return this.m_convexAVertex;
+        GetConvexCoordA() {
+            return this.m_convexACoord;
         }
-        GetConvexVerticeB() {
-            return this.m_convexBVertex;
+        GetConvexCoordB() {
+            return this.m_convexBCoord;
         }
     }
     GJKTutorial.SimplexVertex = SimplexVertex;

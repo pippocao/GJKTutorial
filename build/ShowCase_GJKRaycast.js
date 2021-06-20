@@ -95,25 +95,22 @@ var GJKTutorial;
             if (!convexAB) {
                 return;
             }
+            let epa = GJKTutorial.EAPTest(convexAB.A, convexAB.B);
+            if (epa) {
+                let pointA = coord.GetCanvasPosByCoord(epa.penetrationPointOnConvexA);
+                let pointB = coord.GetCanvasPosByCoord(epa.penetrationPointOnConvexB);
+                GJKTutorial.drawArrow(context, pointA, pointB, 6, 2, 'red');
+                return;
+            }
             let runtimeHit = GJKTutorial.GJKRaycast(convexAB.A, convexAB.B, ray);
             let distance = runtimeHit ? runtimeHit.distance : ray.Length;
             let moveVector = ray.Dir.Mul(distance);
             //draw Target ConvexB
-            let startPos = coord.GetCanvasPosByCoord(convexAB.B.GetVertices()[0].coord.Add(moveVector));
-            context.lineWidth = 1;
+            convexAB.B.Translate(moveVector);
             context.setLineDash([4, 4]);
-            context.strokeStyle = '#444444aa';
-            context.fillStyle = '#66444444';
-            context.moveTo(startPos.x, startPos.y);
-            context.beginPath();
-            for (let i = 0; i < convexAB.B.GetVertices().length; ++i) {
-                let pos = coord.GetCanvasPosByCoord(convexAB.B.GetVertices()[i].coord.Add(moveVector));
-                context.lineTo(pos.x, pos.y);
-            }
-            context.stroke();
-            context.fill();
-            context.closePath();
+            convexAB.B.Draw(deltaMs, coord, context, '#444444aa', '#66444444');
             context.setLineDash([]);
+            convexAB.B.Translate(moveVector.Mul(-1));
             //draw Normal
             if (runtimeHit) {
                 let normalStartPoint = runtimeHit.pointA;

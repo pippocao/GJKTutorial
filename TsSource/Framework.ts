@@ -166,7 +166,7 @@ module GJKTutorial
         {
             for(let i = 0; i < this.convexObjs.length; ++i)
             {
-                this.convexObjs[i].Draw(deltaMs, this.coord, this.context);
+                this.convexObjs[i].Draw(deltaMs, this.coord, this.context, 'black', this.convexObjs[i].fillColor);
             }
         }
 
