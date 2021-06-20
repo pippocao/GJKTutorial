@@ -119,6 +119,45 @@ module GJKTutorial
                     context.stroke();
                     context.closePath();
                 }
+            }else if(addType == 3)
+            {
+                for(let i = 0; i < Math.min(2, penddingVertices.length); ++i)
+                {
+                    let pPos = coord.GetCanvasPosByCoord(penddingVertices[i].coord);
+                    context.beginPath();
+                    context.arc(pPos.x, pPos.y, 10, 0, 2 * Math.PI, false);
+                    context.fillStyle = 'black';
+                    context.fill();
+                    context.closePath();
+                }
+                if(penddingVertices.length >= 2)
+                {
+                    context.lineWidth = 1;
+                    context.strokeStyle = 'black';
+                    let p0Pos = coord.GetCanvasPosByCoord(penddingVertices[0].coord);
+                    let p1Pos = coord.GetCanvasPosByCoord(penddingVertices[1].coord);
+                    let radius = currentMousePos.Sub(p1Pos).magnitude;
+        
+                    let dir = p1Pos.Sub(p0Pos);
+                    let radiusDir = new Vec2(-dir.y, dir.x);
+                    radiusDir = radiusDir.Normalize().Mul(radius);
+                    let p0ArcStart = p0Pos.Add(radiusDir);
+                    let p1ArcStart = p1Pos.Sub(radiusDir);
+                    let Arc0StartAngle = Math.acos(radiusDir.x / radius);
+                    if(dir.x < 0)
+                    {
+                        Arc0StartAngle = Math.PI * 2 - Arc0StartAngle;
+                    }
+        
+                    context.beginPath();
+                    context.moveTo(p0ArcStart.x, p0ArcStart.y);
+                    context.arc(p0Pos.x, p0Pos.y, radius, Arc0StartAngle, Arc0StartAngle + Math.PI, false);
+                    context.lineTo(p1ArcStart.x, p1ArcStart.y);
+                    context.arc(p1Pos.x, p1Pos.y, radius, Arc0StartAngle + Math.PI, Arc0StartAngle + Math.PI + Math.PI, false);
+                    context.lineTo(p0ArcStart.x, p0ArcStart.y);
+                    context.stroke();
+                    context.closePath();
+                }
             }
         };
 
@@ -182,7 +221,7 @@ module GJKTutorial
 
         let FinishAdd = function()
         {
-            if(addType == 1 && customDrawPenddingVertex.length >= 3)
+            if(addType == 1 && penddingVertices.length >= 3)
             {
                 let convex = new Polygon();
                 for(let i = 0; i < penddingVertices.length; ++i)
@@ -199,10 +238,16 @@ module GJKTutorial
                 }else{
                     window.alert("Only Convex Object are allowed!");
                 }
-            }else if(addType == 2 && customDrawPenddingVertex.length >= 2)
+            }else if(addType == 2 && penddingVertices.length >= 2)
             {
                 let radius = penddingVertices[0].coord.Sub(penddingVertices[1].coord).magnitude;
                 let convex = new Circle(penddingVertices[0].coord, radius);
+                convex.name = GetAvailableCoordinateName(framework, false, null);
+                framework.AddConvex(convex);
+            }else if(addType == 3 && penddingVertices.length >= 3)
+            {
+                let radius = penddingVertices[2].coord.Sub(penddingVertices[1].coord).magnitude;
+                let convex = new Capsule(penddingVertices[0].coord, penddingVertices[1].coord, radius);
                 convex.name = GetAvailableCoordinateName(framework, false, null);
                 framework.AddConvex(convex);
             }

@@ -185,13 +185,14 @@ var GJKTutorial;
         if (!initSimplex) {
             return null;
         }
-        let allSteps = [];
         let lastStep = new EPAStepResult();
         lastStep.simplex = initSimplex;
         lastStep.supportDir = EPAGetBestNextSupportDir(initSimplex);
+        lastStep.closestEdgeToOrigin = [...lastStep.simplex.GetClosestEdgeToOrigin()];
+        lastStep.closestToOriginPointOnEdge = GJKTutorial.ClosestPointOnSegment(new GJKTutorial.Vec2(0, 0), lastStep.closestEdgeToOrigin[0].coord, lastStep.closestEdgeToOrigin[1].coord);
+        lastStep.closestDistanceSqr = lastStep.closestToOriginPointOnEdge.magnitudeSqr;
         while (true) {
             let newStep = EPAStep(convexA, convexB, lastStep);
-            allSteps.push(newStep);
             if (newStep.isLastStep) {
                 //iteration quit
                 return ResolveEPAStep(newStep);

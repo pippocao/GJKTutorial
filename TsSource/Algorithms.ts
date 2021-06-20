@@ -235,6 +235,9 @@ module GJKTutorial
         let lastStep = new EPAStepResult();
         lastStep.simplex = initSimplex;
         lastStep.supportDir = EPAGetBestNextSupportDir(initSimplex);
+        lastStep.closestEdgeToOrigin = [...lastStep.simplex.GetClosestEdgeToOrigin()];
+        lastStep.closestToOriginPointOnEdge = ClosestPointOnSegment(new Vec2(0, 0), lastStep.closestEdgeToOrigin[0].coord, lastStep.closestEdgeToOrigin[1].coord);
+        lastStep.closestDistanceSqr = lastStep.closestToOriginPointOnEdge.magnitudeSqr;
         while(true)
         {
             let newStep = EPAStep(convexA, convexB, lastStep);

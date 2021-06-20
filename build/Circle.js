@@ -3,25 +3,31 @@ var GJKTutorial;
     class Circle extends GJKTutorial.Convex {
         constructor(centerPos, radius) {
             super();
-            this.pos = new GJKTutorial.Vec2(0, 0);
+            this.center = new GJKTutorial.Vec2(0, 0);
             this.radius = 1;
-            this.pos = centerPos;
+            this.GetCenter = function () {
+                return this.center;
+            };
+            this.GetRadius = function () {
+                return this.radius;
+            };
+            this.center = centerPos;
             this.radius = radius;
         }
         Translate(offset) {
-            this.pos = this.pos.Add(offset);
+            this.center = this.center.Add(offset);
         }
         IsPointInConvex(point) {
-            return point.Sub(this.pos).magnitudeSqr <= this.radius * this.radius;
+            return point.Sub(this.center).magnitudeSqr <= this.radius * this.radius;
         }
         GetCenterCoord() {
-            return this.pos;
+            return this.center;
         }
         Support(dir) {
-            return new GJKTutorial.Vertex(this.pos.Add(dir.Normalize().Mul(this.radius)), this.name);
+            return new GJKTutorial.Vertex(this.center.Add(dir.Normalize().Mul(this.radius)), this.name);
         }
         Draw(deltaMs, coord, context, strokeColor, fillColor) {
-            let centerPos = coord.GetCanvasPosByCoord(this.pos);
+            let centerPos = coord.GetCanvasPosByCoord(this.center);
             let radius = coord.GetCanvasPosByCoord(new GJKTutorial.Vec2(0, this.radius)).Sub(coord.GetCanvasPosByCoord(new GJKTutorial.Vec2(0, 0))).magnitude;
             context.beginPath();
             context.arc(centerPos.x, centerPos.y, 4, 0, 2 * Math.PI, false);

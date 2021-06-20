@@ -91,7 +91,8 @@ var GJKTutorial;
                 pushObj = convexA;
                 pushDir = pushDir.Mul(-1);
             }
-            let distance = 10 / 1000 * dtMs; //move 10 unit coord per second
+            let maxDistance = pushDir.magnitude;
+            let distance = Math.min(10 / 1000 * dtMs, maxDistance); //move 10 unit coord per second
             pushDir = pushDir.Normalize();
             pushObj.Translate(pushDir.Mul(distance));
         }
