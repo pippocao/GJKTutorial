@@ -70,4 +70,4 @@ var GJKTutorial;
     }
     GJKTutorial.Vec2 = Vec2;
 })(GJKTutorial || (GJKTutorial = {}));
-//# sourceMappingURL=Vec2.js.map
+//# sourceMappingURL=vec2.js.map

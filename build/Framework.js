@@ -39,6 +39,9 @@ var GJKTutorial;
                 }
             });
             this.canvas.addEventListener("wheel", (evt) => {
+                if (this.canvas.width < evt.offsetX || this.canvas.height < evt.offsetY) {
+                    return;
+                }
                 this.coord.coordXMax += evt.deltaY / 100;
                 this.coord.coordYMax += evt.deltaY / 100;
                 evt.preventDefault();
